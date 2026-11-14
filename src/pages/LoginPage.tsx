@@ -30,7 +30,10 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="prila-gradient-text text-3xl font-bold">prila</div>
+        <div className="flex items-center gap-3">
+          <img src="/brand/prila-app-icon.svg" alt="" className="h-12 w-12" />
+          <img src="/brand/prila-wordmark-light.svg" alt="Prila" className="h-10 w-auto" />
+        </div>
         <p className="mt-2 text-sm text-slate-500">Admin sign-in</p>
         <label className="mt-6 block text-sm font-medium text-slate-700">
           Email

@@ -36,7 +36,7 @@ export function Shell({ route, children }: Props) {
     <div className="min-h-screen bg-[var(--prila-bg)] lg:grid lg:grid-cols-[240px_1fr]">
       <aside className="border-b border-[var(--prila-border)] bg-[var(--prila-surface)] lg:border-b-0 lg:border-r">
         <div className="px-5 py-5">
-          <div className="prila-gradient-text text-2xl font-bold tracking-tight">prila</div>
+          <img src="/brand/prila-wordmark-light.svg" alt="Prila" className="h-8 w-auto" />
           <div className="mt-1 text-xs text-[var(--prila-muted)]">Admin · Ops</div>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible">
