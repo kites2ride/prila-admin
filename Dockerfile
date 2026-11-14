@@ -5,7 +5,7 @@ WORKDIR /app
 ARG VITE_API_BASE_URL=https://api.prila.in/api/v1
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 COPY index.html vite.config.ts tsconfig.json tsconfig.node.json ./
 COPY src ./src
 RUN npm run build
