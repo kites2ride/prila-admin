@@ -42,7 +42,7 @@ pipeline {
           def ok = false
           for (int i = 0; i < 30; i++) {
             def code = sh(
-              script: 'curl -sf -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/ || true',
+              script: 'curl -sf -o /dev/null -w "%{http_code}" http://admin/ || true',
               returnStdout: true
             ).trim()
             if (code == '200') {
