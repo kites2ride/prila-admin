@@ -20,8 +20,12 @@ pipeline {
         script {
           sh """
             docker tag ${IMAGE}:latest ${IMAGE}:previous || true
+            MAPS_KEY=\$(grep -E '^VITE_GOOGLE_MAPS_KEY=' /opt/prila/env/admin.env 2>/dev/null | cut -d= -f2- || true)
+            MAP_ID=\$(grep -E '^VITE_GOOGLE_MAP_ID=' /opt/prila/env/admin.env 2>/dev/null | cut -d= -f2- || true)
             docker build \\
               --build-arg VITE_API_BASE_URL=https://api.prila.in/api/v1 \\
+              --build-arg VITE_GOOGLE_MAPS_KEY="\$MAPS_KEY" \\
+              --build-arg VITE_GOOGLE_MAP_ID="\$MAP_ID" \\
               -t ${IMAGE}:latest .
           """
         }
