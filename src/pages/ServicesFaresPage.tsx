@@ -41,6 +41,11 @@ const emptyFare = {
   platformFeePaise: 500,
 };
 
+const FIELD_HINTS: Partial<Record<string, string>> = {
+  nightMultiplier: "Used during the city's night hours (Cities → Pricing times). 1 = no night fare.",
+  surgeMultiplier: 'Fixed extra for this service on top of live surge. Keep 1 normally.',
+};
+
 export function ServicesFaresPage() {
   const servicesQ = useAdminQuery<{ items: Service[] }>('/admin/services');
   const citiesQ = useAdminQuery<{ items: City[] }>('/admin/cities');
@@ -189,6 +194,7 @@ export function ServicesFaresPage() {
                 value={fare[key]}
                 onChange={(e) => setFare({ ...fare, [key]: Number(e.target.value) })}
               />
+              {FIELD_HINTS[key] ? <span className="mt-1 block font-normal text-slate-400">{FIELD_HINTS[key]}</span> : null}
             </label>
           ))}
         </div>

@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
 import { clearSession, getEmail } from '../lib/session';
 import { navigate, type RouteId } from '../lib/pathRouter';
+import { useKycPending } from '../lib/kycAlerts';
 
 const NAV: { id: RouteId; label: string }[] = [
   { id: 'overview', label: 'Overview' },
+  { id: 'live-map', label: 'Live map' },
+  { id: 'kyc', label: 'KYC review' },
   { id: 'app-config', label: 'App config' },
-  { id: 'matching', label: 'Matching (legacy)' },
   { id: 'dispatch', label: 'Dispatch' },
   { id: 'surge', label: 'Surge heatmap' },
+  { id: 'maps', label: 'Maps (cost)' },
   { id: 'pilot-quality', label: 'Pilot quality' },
   { id: 'pilots', label: 'Pilots' },
   { id: 'payouts', label: 'Payouts' },
@@ -20,7 +23,10 @@ const NAV: { id: RouteId; label: string }[] = [
   { id: 'support', label: 'Support' },
   { id: 'maintenance', label: 'Maintenance' },
   { id: 'app-update', label: 'App update' },
-  { id: 'cities', label: 'Cities & zones' },
+  { id: 'cities', label: 'Cities' },
+  { id: 'zones', label: 'Zones (map)' },
+  { id: 'zone-rules', label: 'Zone rules' },
+  { id: 'landmarks', label: 'Landmarks' },
   { id: 'services-fares', label: 'Services & fares' },
   { id: 'rides', label: 'Rides' },
   { id: 'audit', label: 'Audit log' },
@@ -32,6 +38,7 @@ type Props = {
 };
 
 export function Shell({ route, children }: Props) {
+  const kycPending = useKycPending();
   return (
     <div className="min-h-screen bg-[var(--prila-bg)] lg:grid lg:grid-cols-[240px_1fr]">
       <aside className="border-b border-[var(--prila-border)] bg-[var(--prila-surface)] lg:border-b-0 lg:border-r">
@@ -53,7 +60,17 @@ export function Shell({ route, children }: Props) {
                     : 'text-slate-600 hover:bg-[var(--prila-bg)]'
                 }`}
               >
-                {item.label}
+                <span className="flex items-center justify-between gap-2">
+                  {item.label}
+                  {item.id === 'kyc' && kycPending ? (
+                    <span
+                      className="min-w-5 rounded-full bg-red-600 px-1.5 text-center text-xs font-bold leading-5 text-white"
+                      aria-label={`${kycPending} waiting for review`}
+                    >
+                      {kycPending > 99 ? '99+' : kycPending}
+                    </span>
+                  ) : null}
+                </span>
               </button>
             );
           })}

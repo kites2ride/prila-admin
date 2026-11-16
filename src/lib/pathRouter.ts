@@ -1,7 +1,8 @@
 export type RouteId =
   | 'overview'
+  | 'live-map'
+  | 'kyc'
   | 'app-config'
-  | 'matching'
   | 'support'
   | 'maintenance'
   | 'app-update'
@@ -10,6 +11,10 @@ export type RouteId =
   | 'rides'
   | 'dispatch'
   | 'surge'
+  | 'maps'
+  | 'zones'
+  | 'zone-rules'
+  | 'landmarks'
   | 'pilot-quality'
   | 'pilots'
   | 'payouts'
@@ -24,10 +29,12 @@ export type RouteId =
 
 const ROUTES: RouteId[] = [
   'overview',
+  'live-map',
+  'kyc',
   'app-config',
-  'matching',
   'dispatch',
   'surge',
+  'maps',
   'pilot-quality',
   'pilots',
   'payouts',
@@ -41,6 +48,9 @@ const ROUTES: RouteId[] = [
   'maintenance',
   'app-update',
   'cities',
+  'zones',
+  'zone-rules',
+  'landmarks',
   'services-fares',
   'rides',
   'audit',

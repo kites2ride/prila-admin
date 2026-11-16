@@ -7,6 +7,10 @@ import { OverviewPage } from './pages/OverviewPage';
 import { ConfigEditorPage } from './pages/ConfigEditorPage';
 import { AppConfigPage } from './pages/AppConfigPage';
 import { CitiesPage } from './pages/CitiesPage';
+import { ZonesPage } from './pages/ZonesPage';
+import { LiveMapPage } from './pages/LiveMapPage';
+import { KycReviewPage } from './pages/KycReviewPage';
+import { LandmarksPage } from './pages/LandmarksPage';
 import { ServicesFaresPage } from './pages/ServicesFaresPage';
 import { AuditPage } from './pages/AuditPage';
 import { RidesPage } from './pages/RidesPage';
@@ -24,15 +28,6 @@ function renderPage(route: RouteId) {
       return <OverviewPage />;
     case 'app-config':
       return <AppConfigPage />;
-    case 'matching':
-      return (
-        <ConfigEditorPage
-          title="Matching (legacy)"
-          configKey="matching"
-          requireConfirm
-          description="Used only when dispatch.enabled=false. Quote TTL still read from here."
-        />
-      );
     case 'dispatch':
       return (
         <ConfigEditorPage
@@ -49,6 +44,32 @@ function renderPage(route: RouteId) {
           configKey="surge"
           requireConfirm
           description="H3 demand/supply heatmap. Keep enabled=false until tuned. Multiplier snapshotted into quote."
+        />
+      );
+    case 'live-map':
+      return <LiveMapPage />;
+    case 'kyc':
+      return <KycReviewPage />;
+    case 'zones':
+      return <ZonesPage />;
+    case 'landmarks':
+      return <LandmarksPage />;
+    case 'zone-rules':
+      return (
+        <ConfigEditorPage
+          title="Zone rules"
+          configKey="zones"
+          requireConfirm
+          description="enforce, requireDropInside, pilotMustBeInside, showOutlineOnMap and the messages riders / pilots see when outside the service area. Draw the zones on Zones (map)."
+        />
+      );
+    case 'maps':
+      return (
+        <ConfigEditorPage
+          title="Maps (Google cost controls)"
+          configKey="maps"
+          requireConfirm
+          description="Server-side Google Places / Routes / Geocoding. enabled=false stops all Google calls (estimate falls back to straight-line). Keep routeTrafficAware=false unless needed (pricier SKU). Usage: GET /admin/maps/usage."
         />
       );
     case 'pilot-quality':

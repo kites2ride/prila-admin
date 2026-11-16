@@ -18,6 +18,23 @@ type RideRow = {
   startOtp?: string;
   riderId?: string;
   pilotId?: string | null;
+  paymentStatus?: string;
+  payAt?: 'pickup' | 'drop' | null;
+  paymentIssue?: {
+    code: string;
+    at: string;
+    resolvedAt?: string | null;
+    resolvedBy?: string | null;
+    resolutionNote?: string | null;
+  } | null;
+  pilotCancelCount?: number;
+};
+
+const ISSUE_FILTER = '__payment_issue';
+const ISSUE_LABEL: Record<string, string> = {
+  receiver_refused: "Receiver didn't pay",
+  rider_refused: "Rider didn't pay",
+  other: 'Cash not collected',
 };
 
 type RideList = {
@@ -37,11 +54,39 @@ export function RidesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+  const [resolveErr, setResolveErr] = useState<string | null>(null);
   const limit = 20;
 
   const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (status) qs.set('status', status);
-  const { data, error, loading, reload } = useAdminQuery<RideList>(`/admin/rides?${qs}`);
+  const issues = status === ISSUE_FILTER;
+  if (status && !issues) qs.set('status', status);
+  const { data, error, loading, reload } = useAdminQuery<RideList>(
+    issues ? `/admin/rides/payment-issues?${qs}` : `/admin/rides?${qs}`,
+  );
+
+  async function resolveIssue() {
+    if (!selectedId) return;
+    if (note.trim().length < 3) {
+      setResolveErr('Write what happened (e.g. "Sender paid by UPI").');
+      return;
+    }
+    setBusy(true);
+    setResolveErr(null);
+    try {
+      await adminFetch(`/admin/rides/${selectedId}/payment-issue/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ note: note.trim() }),
+      });
+      setNote('');
+      reload();
+      detail.reload();
+    } catch (e) {
+      setResolveErr(e instanceof Error ? e.message : 'Could not save');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const detail = useAdminQuery<RideRow>(selectedId ? `/admin/rides/${selectedId}` : null);
 
@@ -81,6 +126,7 @@ export function RidesPage() {
             }}
           >
             <option value="">All statuses</option>
+            <option value={ISSUE_FILTER}>⚠ Payment not collected</option>
             {[
               'searching',
               'pilot_arriving',
@@ -126,7 +172,14 @@ export function RidesPage() {
                       <span className="ml-2 rounded-full bg-pink-50 px-2 py-0.5 text-xs text-pink-700">Shakti</span>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 font-medium">{row.status}</td>
+                  <td className="px-4 py-3 font-medium">
+                    {row.status}
+                    {row.paymentIssue && !row.paymentIssue.resolvedAt ? (
+                      <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        {ISSUE_LABEL[row.paymentIssue.code] ?? 'Cash not collected'}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3 text-slate-600">
                     {row.pickup?.name ?? '—'} → {row.drop?.name ?? '—'}
                   </td>
@@ -163,8 +216,57 @@ export function RidesPage() {
                 </div>
                 <div>
                   <span className="text-slate-500">Fare</span>
-                  <div>{inr(detail.data.fareTotalPaise)}</div>
+                  <div>
+                    {inr(detail.data.fareTotalPaise)} · {detail.data.paymentStatus ?? '—'}
+                    {detail.data.payAt ? ` · parcel, pay at ${detail.data.payAt}` : ''}
+                  </div>
                 </div>
+                {detail.data.pilotCancelCount ? (
+                  <div className="rounded-xl bg-slate-50 p-3 text-slate-700">
+                    {detail.data.pilotCancelCount === 1 ? 'A pilot' : `${detail.data.pilotCancelCount} pilots`} cancelled
+                    after accepting; the ride was offered again automatically.
+                  </div>
+                ) : null}
+                {detail.data.paymentIssue ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <div className="font-semibold text-amber-900">
+                      {ISSUE_LABEL[detail.data.paymentIssue.code] ?? 'Cash not collected'} ·{' '}
+                      {inr(detail.data.fareTotalPaise)}
+                    </div>
+                    <div className="text-xs text-amber-800">
+                      {new Date(detail.data.paymentIssue.at).toLocaleString()} · follow up with the sender / rider
+                    </div>
+                    {detail.data.paymentIssue.resolvedAt ? (
+                      <div className="mt-2 text-sm text-slate-700">
+                        Resolved by {detail.data.paymentIssue.resolvedBy} on{' '}
+                        {new Date(detail.data.paymentIssue.resolvedAt).toLocaleString()}:{' '}
+                        {detail.data.paymentIssue.resolutionNote}
+                      </div>
+                    ) : (
+                      <div className="mt-3 space-y-2">
+                        <label className="block text-xs font-medium text-amber-900" htmlFor="resolve-note">
+                          What happened? (required)
+                        </label>
+                        <input
+                          id="resolve-note"
+                          className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm"
+                          placeholder="e.g. Sender paid ₹50 by UPI"
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                        />
+                        {resolveErr ? <p className="text-xs text-red-600">{resolveErr}</p> : null}
+                        <button
+                          type="button"
+                          className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+                          disabled={busy}
+                          onClick={() => void resolveIssue()}
+                        >
+                          Mark resolved
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
                 <div>
                   <span className="text-slate-500">Rider / Pilot</span>
                   <div className="break-all">{detail.data.riderId}</div>

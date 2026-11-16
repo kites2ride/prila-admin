@@ -48,3 +48,16 @@ body {
     background-position: -200% 0;
   }
 }
+
+/* Live map: rider waiting for a pilot */
+.prila-live-pulse {
+  box-shadow: 0 0 0 0 rgba(255, 45, 149, 0.55);
+  animation: prila-live-pulse 1.6s ease-out infinite;
+}
+@keyframes prila-live-pulse {
+  70% { box-shadow: 0 0 0 12px rgba(255, 45, 149, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 45, 149, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prila-live-pulse { animation: none; box-shadow: 0 0 0 3px rgba(255, 45, 149, 0.35); }
+}

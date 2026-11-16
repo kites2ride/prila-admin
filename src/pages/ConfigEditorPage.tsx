@@ -6,14 +6,15 @@ import { useAdminQuery } from '../lib/useAdminQuery';
 type ConfigKey =
   | 'app_config_customer'
   | 'app_config_pilot'
-  | 'matching'
   | 'dispatch'
   | 'surge'
   | 'pilot_quality'
   | 'home_promo'
   | 'support'
   | 'maintenance'
-  | 'app_update';
+  | 'app_update'
+  | 'maps'
+  | 'zones';
 
 type Props = {
   title: string;
