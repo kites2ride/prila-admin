@@ -9,11 +9,27 @@ export type ApiEnvelope<T> = ApiOk<T> | ApiErr;
 export class AdminApiError extends Error {
   code: string;
   status: number;
-  constructor(code: string, message: string, status: number) {
+  details?: unknown;
+  constructor(code: string, message: string, status: number, details?: unknown) {
     super(message);
     this.code = code;
     this.status = status;
+    this.details = details;
   }
+}
+
+/** Backend validation errors arrive as details: [{ path, message }]. Turn them into readable text. */
+function withDetails(message: string, details: unknown): string {
+  if (!Array.isArray(details)) return message;
+  const parts = details
+    .map((d) => {
+      const x = d as { path?: unknown; message?: unknown };
+      if (typeof x?.message !== 'string') return null;
+      return typeof x.path === 'string' && x.path ? `${x.path}: ${x.message}` : x.message;
+    })
+    .filter((v): v is string => v !== null)
+    .slice(0, 5);
+  return parts.length ? `${message} — ${parts.join('; ')}` : message;
 }
 
 export async function adminFetch<T>(
@@ -36,9 +52,19 @@ export async function adminFetch<T>(
     throw new AdminApiError('UNAUTHORIZED', 'Session expired', 401);
   }
 
-  const json = (await res.json()) as ApiEnvelope<T>;
+  let json: ApiEnvelope<T>;
+  try {
+    json = (await res.json()) as ApiEnvelope<T>;
+  } catch {
+    throw new AdminApiError('BAD_RESPONSE', `Server returned an unexpected response (HTTP ${res.status})`, res.status);
+  }
   if (!json.ok) {
-    throw new AdminApiError(json.error.code, json.error.message, res.status);
+    throw new AdminApiError(
+      json.error.code,
+      withDetails(json.error.message, json.error.details),
+      res.status,
+      json.error.details,
+    );
   }
   return json.data;
 }

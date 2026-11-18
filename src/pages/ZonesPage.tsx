@@ -275,7 +275,6 @@ export function ZonesPage() {
     );
     const poly = new google.maps.Polygon({
       map: map.current,
-      paths: path,
       editable: true,
       strokeColor: COLORS.editing,
       strokeWeight: 3,
@@ -283,6 +282,9 @@ export function ZonesPage() {
       fillOpacity: 0.15,
       zIndex: 40,
     });
+    // Set the path after construction: an EMPTY `paths` option (new zone) makes Google create no
+    // path at all, so getPath() would be undefined and the "+ New zone" click would crash.
+    poly.setPath(path);
     // Right-click a point to delete it.
     poly.addListener('rightclick', (e) => {
       if (e.vertex !== undefined && poly.getPath().getLength() > 0) poly.getPath().removeAt(e.vertex);

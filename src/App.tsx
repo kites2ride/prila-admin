@@ -4,7 +4,6 @@ import { getToken } from './lib/session';
 import { getRoute, navigate, onRouteChange, type RouteId } from './lib/pathRouter';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
-import { ConfigEditorPage } from './pages/ConfigEditorPage';
 import { AppConfigPage } from './pages/AppConfigPage';
 import { CitiesPage } from './pages/CitiesPage';
 import { ZonesPage } from './pages/ZonesPage';
@@ -21,6 +20,21 @@ import { ReportsPage } from './pages/ReportsPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { NudgesPage } from './pages/NudgesPage';
 import { SosPage } from './pages/SosPage';
+import { HomePromoPage } from './pages/HomePromoPage';
+import { SettingsConfigPage } from './pages/SettingsConfigPage';
+import { AppUpdatePage } from './pages/AppUpdatePage';
+
+const dispatchCrossChecks = (v: Record<string, string>): Record<string, string> =>
+  Number(v.offerTimeoutSec) >= Number(v.maxSearchSec)
+    ? { maxSearchSec: 'Must be longer than the offer timeout' }
+    : {};
+
+const maintenanceConfirm = {
+  when: (before: Record<string, string>, after: Record<string, string>) =>
+    before.enabled !== 'true' && after.enabled === 'true',
+  phrase: 'MAINTENANCE',
+  note: 'This blocks the customer and pilot apps for everyone until you turn it off.',
+};
 
 function renderPage(route: RouteId) {
   switch (route) {
@@ -30,20 +44,21 @@ function renderPage(route: RouteId) {
       return <AppConfigPage />;
     case 'dispatch':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Dispatch"
           configKey="dispatch"
-          requireConfirm
-          description="H3 in-memory matching. Batch offer + first accept. Set enabled=false to roll back to $geoNear."
+          description="How Prila finds and offers rides to nearby pilots. Start values — tune with real data."
+          banner="Live matching logic. A bad value can leave riders without pilots. Turning the engine off rolls back to the legacy search."
+          crossChecks={dispatchCrossChecks}
         />
       );
     case 'surge':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Surge"
           configKey="surge"
-          requireConfirm
-          description="H3 demand/supply heatmap. Keep enabled=false until tuned. Multiplier snapshotted into quote."
+          description="Demand / supply heatmap that can raise fares. Multiplier is snapshotted into the quote at estimate time."
+          banner="Changes fares riders pay. Keep surge off until tuned."
         />
       );
     case 'live-map':
@@ -56,29 +71,28 @@ function renderPage(route: RouteId) {
       return <LandmarksPage />;
     case 'zone-rules':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Zone rules"
           configKey="zones"
-          requireConfirm
-          description="enforce, requireDropInside, pilotMustBeInside, showOutlineOnMap and the messages riders / pilots see when outside the service area. Draw the zones on Zones (map)."
+          description="Service-area enforcement and the messages riders and pilots see when outside it. Draw the zones themselves on Zones (map)."
+          banner="Enforcement decides who can book and who can go online. With no enabled service zone, enforcement is skipped automatically."
         />
       );
     case 'maps':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Maps (Google cost controls)"
           configKey="maps"
-          requireConfirm
-          description="Server-side Google Places / Routes / Geocoding. enabled=false stops all Google calls (estimate falls back to straight-line). Keep routeTrafficAware=false unless needed (pricier SKU). Usage: GET /admin/maps/usage."
+          description="Server-side Google Places / Routes / Geocoding. Defaults are the cheapest safe settings."
+          banner="Turning Google off stops address search and falls back to straight-line fares. Live usage: GET /admin/maps/usage."
         />
       );
     case 'pilot-quality':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Pilot quality"
           configKey="pilot_quality"
-          requireConfirm
-          description="Min rating to go online, cancel-rate gates. Suspension is admin-actioned."
+          description="Rating and cancel-rate gates for pilots going online. Suspension is an admin action unless auto-suspend is on."
         />
       );
     case 'pilots':
@@ -86,13 +100,7 @@ function renderPage(route: RouteId) {
     case 'payouts':
       return <PayoutsPage />;
     case 'home-promo':
-      return (
-        <ConfigEditorPage
-          title="Home promo"
-          configKey="home_promo"
-          description="Banner on customer home when enabled. Apps read via bootstrap."
-        />
-      );
+      return <HomePromoPage />;
     case 'push':
       return <PushPage />;
     case 'reports':
@@ -104,24 +112,25 @@ function renderPage(route: RouteId) {
     case 'sos':
       return <SosPage />;
     case 'support':
-      return <ConfigEditorPage title="Support" configKey="support" description="Phone, WhatsApp, SOS, legal URLs." />;
+      return (
+        <SettingsConfigPage
+          title="Support"
+          configKey="support"
+          description="Contact details, emergency numbers and legal links shown in the apps."
+        />
+      );
     case 'maintenance':
       return (
-        <ConfigEditorPage
+        <SettingsConfigPage
           title="Maintenance"
           configKey="maintenance"
-          requireConfirm
-          description="Blocks apps when enabled (except fail-open rules)."
+          description="Show a maintenance screen in the customer and pilot apps."
+          banner="Turning this on blocks app use for everyone, including riders waiting for a pilot. Check there are no active rides first."
+          strongConfirm={maintenanceConfirm}
         />
       );
     case 'app-update':
-      return (
-        <ConfigEditorPage
-          title="App update policy"
-          configKey="app_update"
-          description="minBuild / latestBuild / storeUrl per app × platform."
-        />
-      );
+      return <AppUpdatePage />;
     case 'cities':
       return <CitiesPage />;
     case 'services-fares':
