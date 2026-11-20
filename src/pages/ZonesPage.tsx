@@ -35,8 +35,8 @@ type TestResult = {
   blockedBy: { name: string } | null;
 };
 
-type Form = { name: string; type: 'service' | 'blocked'; district: string; services: ServiceType[]; enabled: boolean };
-const EMPTY_FORM: Form = { name: '', type: 'service', district: '', services: [], enabled: true };
+type Form = { cityId: string; name: string; type: 'service' | 'blocked'; district: string; services: ServiceType[]; enabled: boolean };
+const EMPTY_FORM: Form = { cityId: '', name: '', type: 'service', district: '', services: [], enabled: true };
 
 const COLORS = {
   service: '#16A34A',
@@ -299,8 +299,8 @@ export function ZonesPage() {
     setEditingId(z ? z.id : null);
     setForm(
       z
-        ? { name: z.name, type: z.type, district: z.district, services: z.services, enabled: z.enabled }
-        : { ...EMPTY_FORM, district: '' },
+        ? { cityId: z.cityId, name: z.name, type: z.type, district: z.district, services: z.services, enabled: z.enabled }
+        : { ...EMPTY_FORM, cityId: activeCityId, district: '' },
     );
     setDrawing(!z); // new zone: start in "add points" mode
     bump();
@@ -329,7 +329,7 @@ export function ZonesPage() {
     setErr(null);
     try {
       const body = {
-        cityId: activeCityId,
+        cityId: form.cityId || activeCityId,
         name: form.name.trim(),
         type: form.type,
         district: form.district.trim(),
@@ -467,6 +467,18 @@ export function ZonesPage() {
                 >
                   <option value="service">Service (rides allowed)</option>
                   <option value="blocked">Blocked (no pickups)</option>
+                </select>
+                <select
+                  className="col-span-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  value={form.cityId || activeCityId}
+                  onChange={(e) => setForm({ ...form, cityId: e.target.value })}
+                  aria-label="City this zone belongs to"
+                >
+                  {(citiesQ.data?.items ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      City: {c.name}
+                    </option>
+                  ))}
                 </select>
                 <input
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
