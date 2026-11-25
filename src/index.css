@@ -1,25 +1,258 @@
 @import 'tailwindcss';
 
 :root {
+  /* Flat, crisp, high-contrast (docs/UI_REFERENCE.md): 85% neutral / 10% charcoal / 5% accent */
   --prila-yellow: #ffc400;
   --prila-orange: #ff8a00;
   --prila-pink: #ff2d95;
-  --prila-purple: #8b2cf5;
+  --prila-purple: #6d28d9;
+  --prila-purple-soft: #f5f3ff;
   --prila-cyan: #00c2ff;
-  --prila-bg: #f7f6fb;
+  --prila-ink: #0f172a;
+  --prila-bg: #f6f7f9;
   --prila-surface: #ffffff;
-  --prila-border: #eceaf2;
-  --prila-text: #16161f;
-  --prila-muted: #6b7280;
-  font-family: Poppins, system-ui, sans-serif;
+  --prila-surface-2: #f8fafc;
+  --prila-border: #e2e8f0;
+  --prila-border-soft: #f1f5f9;
+  --prila-text: #0f172a;
+  --prila-text-2: #475569;
+  --prila-muted: #64748b;
+  --prila-ring: rgba(109, 40, 217, 0.5);
+  --prila-border-hover: #cbd5e1;
+  --prila-on-ink: #ffffff;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* strong ease-out for UI */
+  /* Taste Skill motion tokens: hover in / hover out / press */
+  --m-in: 150ms;
+  --m-out: 120ms;
+  --m-press: 90ms;
+  /* Elevation ladder (Vercel DESIGN.md): L2 subtle, L4 float, L5 modal. Stacked offsets, calm. */
+  --prila-shadow-soft: 0 1px 1px rgba(15, 23, 42, 0.02), 0 2px 2px rgba(15, 23, 42, 0.04);
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --prila-shadow-lift: 0 2px 2px rgba(15, 23, 42, 0.04), 0 8px 16px -4px rgba(15, 23, 42, 0.09);
+  --prila-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --prila-shadow-pop: 0 1px 1px rgba(15, 23, 42, 0.03), 0 8px 16px -4px rgba(15, 23, 42, 0.06), 0 24px 32px -8px rgba(15, 23, 42, 0.1);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--prila-text);
   background: var(--prila-bg);
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  caret-color: var(--prila-purple);
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--prila-bg);
+@layer base {
+  /* scrollbar-width is not inherited, so set it on every scroller (sidebar, tables, dialogs, page) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--prila-bg);
+    font-variant-numeric: tabular-nums;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+  h1 { font-size: 1.5rem; line-height: 2rem; font-weight: 600; letter-spacing: -0.04em; }
+  h2 { letter-spacing: -0.02em; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--prila-ink); color: #f2f2f2; }
+  code, kbd, .mono { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+  /* Visible keyboard focus everywhere; never on mouse click */
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid var(--prila-purple);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--prila-ring);
+    border-color: var(--prila-purple);
+  }
+
+  button, a, [role='switch'], select, summary { touch-action: manipulation; }
+  button:not(:disabled), [role='switch']:not(:disabled) { cursor: pointer; }
+  button { transition: background-color var(--m-out) ease, color var(--m-out) ease, border-color var(--m-out) ease; }
+  button:disabled { cursor: not-allowed; }
+
+  input, select, textarea {
+    font-family: inherit;
+    background-color: var(--prila-surface);
+    color: var(--prila-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input::placeholder, textarea::placeholder { color: #94a3b8; }
+
+  /* Tables: quiet header, hairline rows, hover row */
+  table { border-collapse: separate; border-spacing: 0; }
+  th { white-space: nowrap; }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--prila-surface-2);
+    color: var(--prila-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    border-bottom: 1px solid var(--prila-border);
+  }
+  tbody tr:hover { background: var(--prila-surface-2); }
+  tbody td { border-top: 1px solid var(--prila-border-soft); }
+  tbody tr:first-child td { border-top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ───────── Button system (one vocabulary for every screen) ───────── */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    box-shadow: 0 1px 1px rgba(15, 23, 42, 0.06);
+    transition: transform var(--m-out) var(--ease-out), background-color var(--m-out) ease,
+      border-color var(--m-out) ease, color var(--m-out) ease, box-shadow var(--m-out) var(--ease-out),
+      opacity var(--m-out) ease;
+  }
+  /* Hover: fill steps toward ink + 1px lift + soft shadow (fine pointers only).
+     Press: sinks 1px and scales .985. No glow, no shine sweep. */
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px -6px rgba(15, 23, 42, 0.28);
+      transition-duration: var(--m-in);
+    }
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.985);
+    box-shadow: none;
+    transition-duration: var(--m-press);
+  }
+  .btn-sm { min-height: 2rem; padding: 0 0.75rem; border-radius: var(--r-sm); font-size: 0.8125rem; }
+  .btn:disabled { opacity: 0.5; box-shadow: none; }
+
+  .btn-primary { background: var(--prila-ink); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1e293b; }
+
+  .btn-secondary { background: #fff; color: var(--prila-ink); border-color: var(--prila-border); }
+  .btn-secondary:hover:not(:disabled) { background: var(--prila-surface-2); border-color: #cbd5e1; }
+
+  .btn-soft { background: var(--prila-purple-soft); color: var(--prila-purple); border-color: #ddd6fe; }
+  .btn-soft:hover:not(:disabled) { background: #ede9fe; }
+
+  .btn-success { background: #16a34a; color: #fff; }
+  .btn-success:hover:not(:disabled) { background: #15803d; }
+
+  .btn-warn { background: #d97706; color: #fff; }
+  .btn-warn:hover:not(:disabled) { background: #b45309; }
+
+  .btn-danger { background: #e11d48; color: #fff; }
+  .btn-danger:hover:not(:disabled) { background: #be123c; }
+
+  .btn-danger-soft { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+  .btn-danger-soft:hover:not(:disabled) { background: #ffe4e6; }
+
+  .btn-link { color: var(--prila-purple); font-weight: 600; box-shadow: none; padding: 0; min-height: 0; }
+  .btn-link:hover:not(:disabled) { transform: none; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Soft, layered surface used for every card / table wrapper */
+  .surface {
+    background: var(--prila-surface);
+    border: 1px solid var(--prila-border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--prila-shadow-soft);
+  }
+  /* Only cards that lead somewhere lift (Taste Skill): 2px, border darkens, soft shadow */
+  .surface-link { transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), border-color 180ms ease; cursor: pointer; }
+  @media (hover: hover) and (pointer: fine) {
+    .surface-link:hover { transform: translateY(-2px); border-color: #cbd5e1; box-shadow: var(--prila-shadow-lift); }
+  }
+
+  .field {
+    min-height: 2.5rem;
+    border-radius: var(--r-md);
+    border: 1px solid var(--prila-border);
+    background: #fff;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.03);
+  }
+  .field:hover { border-color: #cbd5e1; }
+  .field-bad { border-color: #fb7185; }
+
+  .alert { border-radius: var(--r-md); border: 1px solid; padding: 0.625rem 0.875rem; font-size: 0.875rem; }
+  .alert-danger { background: #fff1f2; border-color: #fecdd3; color: #be123c; }
+  .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+  .alert-warn { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+
+  /* Links in running text: hairline rests, ink line draws left to right */
+  .link {
+    color: var(--prila-purple);
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 200ms var(--ease-out);
+    text-decoration: none;
+  }
+  .link:hover { background-size: 100% 1px; }
+
+  /* Status badges: soft tint + saturated text, never colour alone (always has a label) */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    background: #f1f5f9;
+    color: #475569;
+    white-space: nowrap;
+  }
+  .badge-success { background: #dcfce7; color: #15803d; }
+  .badge-danger { background: #ffe4e6; color: #be123c; }
+  .badge-warn { background: #fef3c7; color: #b45309; }
+  .badge-info { background: #e0f2fe; color: #0369a1; }
+  .badge-accent { background: var(--prila-purple-soft); color: var(--prila-purple); }
+}
+
+/* Print / Save as PDF: a clean report, no chrome */
+@media print {
+  aside, header, dialog, .btn, [aria-live], nav, button { display: none !important; }
+  html, body { background: #fff !important; }
+  main { padding: 0 !important; }
+  .surface { box-shadow: none !important; break-inside: avoid; }
+  .prila-skel { display: none; }
+  @page { margin: 14mm; }
 }
 
 .prila-gradient {
@@ -32,6 +265,23 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* Overlays: backdrop fades, panel eases up from 0.96 (never from 0). Toasts slide in from the right edge. */
+@keyframes prila-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes prila-pop { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes prila-toast { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes prila-menu { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: none; } }
+.prila-menu { animation: prila-menu 150ms var(--ease-out) both; }
+.prila-fade { animation: prila-fade 160ms ease-out both; }
+.prila-pop { animation: prila-pop 200ms var(--ease-out) both; }
+.prila-toast { animation: prila-toast 220ms var(--ease-out) both; }
+
+/* Entrance for rarely-seen screens only (login). Never on routine navigation. */
+@keyframes prila-rise {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+.prila-rise { animation: prila-rise 260ms var(--ease-out) both; }
 
 .prila-skel {
   background: linear-gradient(90deg, #eceaf2 25%, #f7f6fb 50%, #eceaf2 75%);
@@ -58,6 +308,134 @@ body {
   70% { box-shadow: 0 0 0 12px rgba(255, 45, 149, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 45, 149, 0); }
 }
+.prila-pulse-green {
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  animation: prila-pulse-green 1.8s ease-out infinite;
+}
+@keyframes prila-pulse-green {
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
 @media (prefers-reduced-motion: reduce) {
   .prila-live-pulse { animation: none; box-shadow: 0 0 0 3px rgba(255, 45, 149, 0.35); }
 }
+
+/* ───────── Dark theme ─────────
+   Palette is taken from Linear's DESIGN.md (awesome-design-md): a neutral near-black canvas with a
+   four-step surface ladder and hairline borders. No blue or purple tint anywhere; the lavender accent is
+   reserved for the keyboard focus ring (Linear: "never a card fill or section background").
+   Tailwind v4 emits every colour as a CSS variable, so redefining the scales here flips all pages at once. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --prila-bg: #010102;
+  --prila-surface: #0f1011;
+  --prila-surface-2: #141516;
+  --prila-border: #23252a;
+  --prila-border-soft: #1a1b1e;
+  --prila-border-hover: #34343a;
+  --prila-text: #f7f8f8;
+  --prila-text-2: #d0d6e0;
+  --prila-muted: #8a8f98;
+  --prila-ink: #f7f8f8;
+  --prila-on-ink: #010102;
+  /* "Accent" in dark is simply bright neutral: active menu text, links, selected borders. */
+  --prila-purple: #f7f8f8;
+  --prila-purple-soft: rgba(255, 255, 255, 0.07);
+  --prila-ring: rgba(94, 106, 210, 0.7);
+  /* Linear resists drop shadows on dark: depth comes from the surface ladder and hairlines. */
+  --prila-shadow-soft: 0 0 0 transparent;
+  --prila-shadow-lift: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --prila-shadow-pop: 0 0 0 1px #23252a, 0 16px 40px rgba(0, 0, 0, 0.6);
+
+  --color-slate-50: #141516;
+  --color-slate-100: #18191a;
+  --color-slate-200: #23252a;
+  --color-slate-300: #34343a;
+  --color-slate-400: #6f737b;
+  --color-slate-500: #8a8f98;
+  --color-slate-600: #a4a9b3;
+  --color-slate-700: #d0d6e0;
+  --color-slate-800: #e6e9ee;
+  --color-slate-900: #f7f8f8;
+
+  --color-red-50: #1d1214;
+  --color-red-200: #4a2227;
+  --color-red-400: #ef6a6a;
+  --color-red-600: #ef4444;
+  --color-red-700: #f87171;
+  --color-red-800: #fca5a5;
+  --color-rose-50: #1d1214;
+  --color-rose-500: #ef4444;
+  --color-rose-600: #f87171;
+  --color-rose-700: #fca5a5;
+  --color-orange-50: #1d150d;
+  --color-orange-700: #fdba74;
+  --color-violet-50: #18191a;
+  --color-violet-200: #34343a;
+  --color-violet-300: #4a4d55;
+  --color-violet-600: #5e6ad2;
+  --color-violet-700: #c7ccd8;
+  --color-emerald-50: #0c1f17;
+  --color-emerald-300: #1f6f56;
+  --color-emerald-500: #27a644;
+  --color-emerald-600: #4ade80;
+  --color-emerald-700: #86efac;
+  --color-emerald-800: #bbf7d0;
+  --color-amber-50: #211a0d;
+  --color-amber-200: #5c4415;
+  --color-amber-600: #fbbf24;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+  --color-sky-50: #0b1c28;
+  --color-sky-600: #38bdf8;
+  --color-sky-700: #7dd3fc;
+  --color-green-50: #0e1f15;
+  --color-green-300: #1f6b3c;
+  --color-green-800: #86efac;
+
+  * { scrollbar-color: #34343a transparent; }
+}
+
+:root[data-theme='dark'] [class*='bg-white'] { background-color: var(--prila-surface); }
+/* Dark text on the light "ink" fill (avatars, primary buttons). */
+:root[data-theme='dark'] [class*='bg-[var(--prila-ink)]'] { color: var(--prila-on-ink); }
+:root[data-theme='dark'] ::selection { background: #f7f8f8; color: #010102; }
+:root[data-theme='dark'] .surface-link:hover { border-color: var(--prila-border-hover); background: var(--prila-surface-2); }
+:root[data-theme='dark'] .field { background: var(--prila-surface-2); box-shadow: none; }
+:root[data-theme='dark'] input::placeholder, :root[data-theme='dark'] textarea::placeholder { color: #62666d; }
+:root[data-theme='dark'] .link { color: #d0d6e0; }
+
+:root[data-theme='dark'] .btn { box-shadow: none; }
+:root[data-theme='dark'] .btn:hover:not(:disabled) { box-shadow: none; }
+:root[data-theme='dark'] .btn-primary { background: #f7f8f8; color: #010102; }
+:root[data-theme='dark'] .btn-primary:hover:not(:disabled) { background: #ffffff; }
+:root[data-theme='dark'] .btn-secondary { background: var(--prila-surface-2); color: #f7f8f8; border-color: var(--prila-border); }
+:root[data-theme='dark'] .btn-secondary:hover:not(:disabled) { background: #18191a; border-color: #34343a; }
+:root[data-theme='dark'] .btn-soft { background: #18191a; color: #f7f8f8; border-color: #34343a; }
+:root[data-theme='dark'] .btn-soft:hover:not(:disabled) { background: #1f2022; }
+:root[data-theme='dark'] .btn-danger-soft { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+:root[data-theme='dark'] .btn-danger-soft:hover:not(:disabled) { background: rgba(239, 68, 68, 0.18); }
+
+:root[data-theme='dark'] .badge { background: #1c1d1f; color: #a4a9b3; }
+:root[data-theme='dark'] .badge-success { background: rgba(39, 166, 68, 0.16); color: #86efac; }
+:root[data-theme='dark'] .badge-danger { background: rgba(239, 68, 68, 0.14); color: #fca5a5; }
+:root[data-theme='dark'] .badge-warn { background: rgba(245, 158, 11, 0.14); color: #fcd34d; }
+:root[data-theme='dark'] .badge-info { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; }
+:root[data-theme='dark'] .badge-accent { background: #1c1d1f; color: #d0d6e0; }
+
+:root[data-theme='dark'] .alert-danger { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.28); color: #fca5a5; }
+:root[data-theme='dark'] .alert-success { background: rgba(39, 166, 68, 0.08); border-color: rgba(39, 166, 68, 0.28); color: #86efac; }
+:root[data-theme='dark'] .alert-warn { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.28); color: #fcd34d; }
+
+:root[data-theme='dark'] .prila-skel { background: linear-gradient(90deg, #141516 25%, #1c1d1f 50%, #141516 75%); background-size: 200% 100%; }
+
+/* The login brand panel: Prila navy in light mode, plain near-black in dark mode. */
+.login-brand { background: #0f172a; color: #fff; }
+:root[data-theme='dark'] .login-brand { background: #0f1011; border-right: 1px solid #23252a; }
+
+/* Logos: the dark wordmark is for dark backgrounds. */
+.logo-on-dark { display: none; }
+:root[data-theme='dark'] .logo-on-light { display: none; }
+:root[data-theme='dark'] .logo-on-dark { display: inline-block; }

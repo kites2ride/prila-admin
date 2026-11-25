@@ -3,6 +3,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
 import { parseLatLng } from '../lib/polygon';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 type City = { id: string; name: string };
 type Landmark = {
@@ -119,14 +120,14 @@ export function LandmarksPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Landmarks</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Landmarks</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
             Places riders search for most. These show first in search and are free — Google is only asked when few
             landmarks match.
           </p>
         </div>
         <select
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+          className="field"
           value={activeCityId}
           onChange={(e) => {
             setCityId(e.target.value);
@@ -141,12 +142,12 @@ export function LandmarksPage() {
         </select>
       </div>
 
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
-      {err ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{err}</div> : null}
-      {listQ.error ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{listQ.error}</div> : null}
+      <MsgToast msg={msg} />
+      {err ? <div className="alert alert-danger">{err}</div> : null}
+      {listQ.error ? <div className="alert alert-danger">{listQ.error}</div> : null}
 
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="surface p-4">
           <div className="flex flex-wrap gap-2">
             <form
               className="flex min-w-0 flex-1 gap-2"
@@ -156,19 +157,19 @@ export function LandmarksPage() {
               }}
             >
               <input
-                className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field min-w-0 flex-1"
                 placeholder="Search name or other name"
                 value={q}
                 maxLength={80}
                 onChange={(e) => setQ(e.target.value)}
               />
-              <button type="submit" className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">
+              <button type="submit" className="btn btn-primary">
                 Search
               </button>
             </form>
             <button
               type="button"
-              className="rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="btn btn-primary"
               disabled={!activeCityId}
               onClick={() => startEdit(null)}
             >
@@ -219,7 +220,7 @@ export function LandmarksPage() {
                       <td className="py-2 text-right">
                         <button
                           type="button"
-                          className="rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50"
+                          className="btn btn-secondary btn-sm"
                           onClick={() => startEdit(l)}
                         >
                           Edit
@@ -240,11 +241,11 @@ export function LandmarksPage() {
 
         {editingId !== undefined ? (
           <section className="space-y-3 rounded-2xl border border-violet-200 bg-white p-4">
-            <h2 className="font-semibold">{editingId ? 'Edit landmark' : 'New landmark'}</h2>
+            <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">{editingId ? 'Edit landmark' : 'New landmark'}</h2>
             <label className="block text-xs font-medium text-slate-600">
               Name
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field mt-1 w-full"
                 placeholder="Kazipet Junction"
                 value={form.name}
                 maxLength={80}
@@ -254,7 +255,7 @@ export function LandmarksPage() {
             <label className="block text-xs font-medium text-slate-600">
               Other names people type (comma separated)
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field mt-1 w-full"
                 placeholder="KZJ, Railway station"
                 value={form.aliases}
                 onChange={(e) => setForm({ ...form, aliases: e.target.value })}
@@ -263,7 +264,7 @@ export function LandmarksPage() {
             <label className="block text-xs font-medium text-slate-600">
               Address
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field mt-1 w-full"
                 placeholder="Kazipet, Hanamkonda"
                 value={form.address}
                 maxLength={200}
@@ -273,7 +274,7 @@ export function LandmarksPage() {
             <label className="block text-xs font-medium text-slate-600">
               Location (lat, lng)
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm"
+                className="field mt-1 w-full font-mono"
                 placeholder="17.9760, 79.5020"
                 value={form.latLng}
                 onChange={(e) => setForm({ ...form, latLng: e.target.value })}
@@ -284,7 +285,7 @@ export function LandmarksPage() {
                 Priority
                 <input
                   type="number"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="field mt-1 w-full"
                   value={form.priority}
                   min={-100}
                   max={100}
@@ -305,7 +306,7 @@ export function LandmarksPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                className="flex-1 rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="btn btn-primary flex-1"
                 disabled={Boolean(formError) || saving}
                 onClick={() => setConfirmOpen(true)}
               >
@@ -313,7 +314,7 @@ export function LandmarksPage() {
               </button>
               <button
                 type="button"
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm"
+                className="btn btn-secondary"
                 onClick={() => {
                   setEditingId(undefined);
                   setForm(EMPTY);

@@ -6,9 +6,11 @@ type Props = {
 
 export function StatCard({ label, value, hint }: Props) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
+    <div className="surface p-4">
+      <div className="text-[13px] font-medium text-[var(--prila-muted)]">{label}</div>
+      <div className="mt-1.5 text-[26px] font-semibold leading-8 tracking-tight text-[var(--prila-ink)] tabular-nums">
+        {value}
+      </div>
       {hint ? <div className="mt-1 text-xs text-slate-400">{hint}</div> : null}
     </div>
   );

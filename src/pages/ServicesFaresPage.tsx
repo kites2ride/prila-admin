@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 type Service = {
   type: string;
@@ -130,14 +131,14 @@ export function ServicesFaresPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Services & fares</h1>
-        <p className="text-sm text-slate-500">Money values are integer paise. Confirm before saving fare rules.</p>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Services & fares</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">Money values are integer paise. Confirm before saving fare rules.</p>
       </div>
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
-      {err ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{err}</div> : null}
+      <MsgToast msg={msg} />
+      {err ? <div className="alert alert-danger">{err}</div> : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 className="font-semibold">Services</h2>
+      <section className="surface p-4">
+        <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Services</h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {(servicesQ.data?.items ?? []).map((s) => (
             <label key={s.type} className="flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2 text-sm">
@@ -151,12 +152,12 @@ export function ServicesFaresPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+      <section className="surface p-4">
         <div className="flex flex-wrap gap-3">
           <label className="text-sm">
             City
             <select
-              className="ml-2 rounded-lg border px-2 py-1.5"
+              className="field ml-2"
               value={effectiveCity}
               onChange={(e) => setCityId(e.target.value)}
             >
@@ -170,7 +171,7 @@ export function ServicesFaresPage() {
           <label className="text-sm">
             Service
             <select
-              className="ml-2 rounded-lg border px-2 py-1.5"
+              className="field ml-2"
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
             >
@@ -190,7 +191,7 @@ export function ServicesFaresPage() {
               <input
                 type="number"
                 step="any"
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-slate-900"
+                className="field mt-1 w-full"
                 value={fare[key]}
                 onChange={(e) => setFare({ ...fare, [key]: Number(e.target.value) })}
               />
@@ -202,12 +203,12 @@ export function ServicesFaresPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white"
+            className="btn btn-primary"
             onClick={() => setConfirmOpen(true)}
           >
             Save fare rule
           </button>
-          <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={(e) => void runPreview(e)}>
+          <button type="button" className="btn btn-secondary" onClick={(e) => void runPreview(e)}>
             Preview (8.4 km / 20 min)
           </button>
         </div>

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ListPage } from '../components/ListPage';
+import { StatusBadge, statusLabel } from '../components/ui';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatDateTime, formatInr } from '../lib/format';
 
 type RideRow = {
   id: string;
@@ -43,10 +45,6 @@ type RideList = {
   limit: number;
   total: number;
 };
-
-function inr(paise?: number) {
-  return `₹${((paise ?? 0) / 100).toFixed(0)}`;
-}
 
 export function RidesPage() {
   const [page, setPage] = useStickyState('rides_page', 1);
@@ -118,7 +116,7 @@ export function RidesPage() {
         error={error}
         filters={
           <select
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="field"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -126,7 +124,7 @@ export function RidesPage() {
             }}
           >
             <option value="">All statuses</option>
-            <option value={ISSUE_FILTER}>⚠ Payment not collected</option>
+            <option value={ISSUE_FILTER}>Payment not collected</option>
             {[
               'searching',
               'pilot_arriving',
@@ -139,43 +137,58 @@ export function RidesPage() {
               'cancelled_by_system',
             ].map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </select>
         }
       >
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="surface overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className="bg-slate-50 text-xs text-slate-500">
               <tr>
                 <th className="px-4 py-3">When</th>
                 <th className="px-4 py-3">Service</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Route</th>
-                <th className="px-4 py-3">Fare</th>
+                <th className="px-4 py-3 text-right">Fare</th>
               </tr>
             </thead>
             <tbody>
+              {!loading && (data?.items ?? []).length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-slate-500">
+                    No rides match these filters. Try another status or clear the filter.
+                  </td>
+                </tr>
+              ) : null}
               {(data?.items ?? []).map((row) => (
                 <tr
                   key={row.id}
-                  className="cursor-pointer border-t border-slate-100 hover:bg-violet-50/40"
+                  className="cursor-pointer focus-visible:bg-violet-50"
+                  tabIndex={0}
+                  aria-label={`Open ride ${row.id}`}
                   onClick={() => setSelectedId(row.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedId(row.id);
+                    }
+                  }}
                 >
-                  <td className="px-4 py-3 text-slate-500">
-                    {row.createdAt ? new Date(row.createdAt).toLocaleString() : '—'}
+                  <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    {row.createdAt ? formatDateTime(row.createdAt) : '—'}
                   </td>
                   <td className="px-4 py-3">
                     {row.serviceType}
                     {row.shakti ? (
-                      <span className="ml-2 rounded-full bg-pink-50 px-2 py-0.5 text-xs text-pink-700">Shakti</span>
+                      <span className="badge badge-accent ml-2">Shakti</span>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 font-medium">
-                    {row.status}
+                  <td className="px-4 py-3">
+                    <StatusBadge status={row.status} />
                     {row.paymentIssue && !row.paymentIssue.resolvedAt ? (
-                      <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      <span className="badge badge-warn ml-2">
                         {ISSUE_LABEL[row.paymentIssue.code] ?? 'Cash not collected'}
                       </span>
                     ) : null}
@@ -183,7 +196,7 @@ export function RidesPage() {
                   <td className="px-4 py-3 text-slate-600">
                     {row.pickup?.name ?? '—'} → {row.drop?.name ?? '—'}
                   </td>
-                  <td className="px-4 py-3">{inr(row.fareTotalPaise)}</td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums">{formatInr(row.fareTotalPaise)}</td>
                 </tr>
               ))}
             </tbody>
@@ -199,7 +212,7 @@ export function RidesPage() {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">Ride detail</h2>
+                <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Ride detail</h2>
                 <p className="text-xs text-slate-500 break-all">{selectedId}</p>
               </div>
               <button type="button" className="text-sm text-slate-500" onClick={() => setSelectedId(null)}>
@@ -212,12 +225,14 @@ export function RidesPage() {
               <div className="mt-4 space-y-3 text-sm">
                 <div>
                   <span className="text-slate-500">Status</span>
-                  <div className="font-semibold">{detail.data.status}</div>
+                  <div className="mt-0.5">
+                    <StatusBadge status={detail.data.status} />
+                  </div>
                 </div>
                 <div>
                   <span className="text-slate-500">Fare</span>
                   <div>
-                    {inr(detail.data.fareTotalPaise)} · {detail.data.paymentStatus ?? '—'}
+                    {formatInr(detail.data.fareTotalPaise)} · {detail.data.paymentStatus ?? '—'}
                     {detail.data.payAt ? ` · parcel, pay at ${detail.data.payAt}` : ''}
                   </div>
                 </div>
@@ -231,15 +246,15 @@ export function RidesPage() {
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
                     <div className="font-semibold text-amber-900">
                       {ISSUE_LABEL[detail.data.paymentIssue.code] ?? 'Cash not collected'} ·{' '}
-                      {inr(detail.data.fareTotalPaise)}
+                      {formatInr(detail.data.fareTotalPaise)}
                     </div>
                     <div className="text-xs text-amber-800">
-                      {new Date(detail.data.paymentIssue.at).toLocaleString()} · follow up with the sender / rider
+                      {formatDateTime(detail.data.paymentIssue.at)} · follow up with the sender / rider
                     </div>
                     {detail.data.paymentIssue.resolvedAt ? (
                       <div className="mt-2 text-sm text-slate-700">
                         Resolved by {detail.data.paymentIssue.resolvedBy} on{' '}
-                        {new Date(detail.data.paymentIssue.resolvedAt).toLocaleString()}:{' '}
+                        {formatDateTime(detail.data.paymentIssue.resolvedAt)}:{' '}
                         {detail.data.paymentIssue.resolutionNote}
                       </div>
                     ) : (
@@ -249,7 +264,7 @@ export function RidesPage() {
                         </label>
                         <input
                           id="resolve-note"
-                          className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="field w-full"
                           placeholder="e.g. Sender paid ₹50 by UPI"
                           value={note}
                           onChange={(e) => setNote(e.target.value)}
@@ -257,7 +272,7 @@ export function RidesPage() {
                         {resolveErr ? <p className="text-xs text-red-600">{resolveErr}</p> : null}
                         <button
                           type="button"
-                          className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+                          className="btn btn-warn btn-sm"
                           disabled={busy}
                           onClick={() => void resolveIssue()}
                         >
@@ -278,11 +293,11 @@ export function RidesPage() {
                     {(detail.data.timeline ?? []).map((t, i) => (
                       <li key={`${t.at}-${i}`}>
                         <div className="font-medium">
-                          {t.from ? `${t.from} → ` : ''}
-                          {t.to}
+                          {t.from ? `${statusLabel(t.from)} → ` : ''}
+                          {statusLabel(t.to)}
                         </div>
                         <div className="text-xs text-slate-500">
-                          {new Date(t.at).toLocaleString()} · {t.actor ?? 'system'}
+                          {formatDateTime(t.at)} · {t.actor ?? 'system'}
                         </div>
                       </li>
                     ))}
@@ -293,7 +308,7 @@ export function RidesPage() {
                 ) ? (
                   <button
                     type="button"
-                    className="mt-4 w-full rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white"
+                    className="btn btn-danger mt-4 w-full"
                     onClick={() => setCancelOpen(true)}
                     disabled={busy}
                   >

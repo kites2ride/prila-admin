@@ -508,10 +508,10 @@ export function LiveMapPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">Live map</h1>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Live map</h1>
         <select
           aria-label="City"
-          className="rounded-xl border border-[var(--prila-border)] bg-white px-3 py-2 text-sm"
+          className="field"
           value={cityId}
           onChange={(e) => {
             setPickedCity(e.target.value);
@@ -546,7 +546,7 @@ export function LiveMapPage() {
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <aside className="space-y-4">
-          <section className="rounded-2xl border border-[var(--prila-border)] bg-white p-3">
+          <section className="surface p-3">
             <div className="mb-2 flex items-center justify-between px-1">
               <h2 className="text-sm font-semibold">Right now</h2>
               {focus ? (
@@ -586,7 +586,7 @@ export function LiveMapPage() {
             <p className="mt-2 px-1 text-xs text-[var(--prila-muted)]">Click a row to show only those on the map.</p>
           </section>
 
-          <section className="rounded-2xl border border-[var(--prila-border)] bg-white p-3">
+          <section className="surface p-3">
             <h2 className="mb-2 px-1 text-sm font-semibold">Show on map</h2>
             <ul className="space-y-1">
               {layerRows.map((l) => (
@@ -625,9 +625,9 @@ export function LiveMapPage() {
           </section>
 
           {selected ? (
-            <section className="rounded-2xl border border-[var(--prila-border)] bg-white p-4 text-sm" aria-live="polite">
+            <section className="surface p-4" aria-live="polite">
               <div className="mb-2 flex items-start justify-between">
-                <h2 className="font-semibold">{selected.kind === 'pilot' ? 'Pilot' : 'Ride'}</h2>
+                <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">{selected.kind === 'pilot' ? 'Pilot' : 'Ride'}</h2>
                 <button type="button" aria-label="Close" className="text-[var(--prila-muted)]" onClick={() => setSelected(null)}>
                   ✕
                 </button>
@@ -671,14 +671,14 @@ export function LiveMapPage() {
           ) : null}
         </aside>
 
-        <div className="relative h-[calc(100vh-180px)] min-h-[520px] overflow-hidden rounded-2xl border border-[var(--prila-border)] bg-white">
+        <div className="surface h-[calc(100vh-180px)] min-h-[520px] overflow-hidden">
           {mapsError ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm">
               <p className="text-red-600">{mapsError}</p>
               {mapsConfigured() ? (
                 <button
                   type="button"
-                  className="rounded-xl bg-[var(--prila-purple)] px-4 py-2 font-medium text-white"
+                  className="btn btn-primary"
                   onClick={() => setMapsAttempt((a) => a + 1)}
                 >
                   Retry

@@ -7,16 +7,44 @@
     <link rel="icon" type="image/svg+xml" href="/brand/prila-app-icon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#0B0B12" />
+    <script>
+      /* Apply the saved theme before first paint so a dark-mode user never sees a white flash. */
+      try {
+        var p = localStorage.getItem('prila_theme') || 'system';
+        var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
+    <meta name="theme-color" content="#F6F7F9" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="Prila operations console: rides, pilots, KYC, fares and payouts." />
+    <style>
+      html, body { margin: 0; background: #f6f7f9; }
+      html[data-theme='dark'], html[data-theme='dark'] body { background: #010102; }
+      html[data-theme='dark'] .boot-bar { background: #23252a; }
+      html[data-theme='dark'] .boot-bar span { background: #f7f8f8; }
+      html[data-theme='dark'] .boot img { filter: brightness(0) invert(1); }
+      .boot { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+      .boot-bar { width: 120px; height: 3px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
+      .boot-bar span { display: block; width: 40%; height: 100%; border-radius: 3px; background: #0f172a; animation: boot 1s ease-in-out infinite; }
+      @keyframes boot { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+      @media (prefers-reduced-motion: reduce) { .boot-bar span { animation: none; width: 100%; } }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body class="bg-slate-50 text-slate-900">
-    <div id="root"></div>
+  <body>
+    <div id="root">
+      <!-- Boot screen: shown until React mounts, then replaced. Avoids a blank white flash. -->
+      <div class="boot" role="status" aria-label="Loading Prila Admin">
+        <img src="/brand/prila-wordmark-light.svg" alt="" width="96" height="32" />
+        <div class="boot-bar"><span></span></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

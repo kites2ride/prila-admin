@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Shell } from './components/Shell';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { NAV_GROUPS } from './lib/nav';
+import { setBaseTitle } from './lib/title';
+import { ProfilePage } from './pages/ProfilePage';
+import { PanelSettingsPage } from './pages/PanelSettingsPage';
 import { getToken } from './lib/session';
 import { getRoute, navigate, onRouteChange, type RouteId } from './lib/pathRouter';
 import { LoginPage } from './pages/LoginPage';
@@ -139,6 +144,10 @@ function renderPage(route: RouteId) {
       return <RidesPage />;
     case 'audit':
       return <AuditPage />;
+    case 'profile':
+      return <ProfilePage />;
+    case 'settings':
+      return <PanelSettingsPage />;
     default:
       return <OverviewPage />;
   }
@@ -155,9 +164,19 @@ export function App() {
     if (authed && route === 'login') navigate('overview');
   }, [authed, route]);
 
+  useEffect(() => {
+    const fixed: Partial<Record<RouteId, string>> = { login: 'Sign in', profile: 'Profile', settings: 'Settings' };
+    const label = fixed[route] ?? NAV_GROUPS.flatMap((g) => g.items).find((i) => i.id === route)?.label;
+    setBaseTitle(label ? `${label} · Prila Admin` : 'Prila Admin');
+  }, [route]);
+
   if (!authed || route === 'login') {
     return <LoginPage />;
   }
 
-  return <Shell route={route}>{renderPage(route)}</Shell>;
+  return (
+    <Shell route={route}>
+      <ErrorBoundary key={route}>{renderPage(route)}</ErrorBoundary>
+    </Shell>
+  );
 }

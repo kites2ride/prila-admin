@@ -1,7 +1,8 @@
+import { formatRelative } from '../lib/format';
 import { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
-import { desktopAlertsState, enableDesktopAlerts, KYC_CHANGED_EVENT } from '../lib/kycAlerts';
+import { KYC_CHANGED_EVENT, turnOnAlerts, useAlertStatus } from '../lib/kycAlerts';
 import { useAdminQuery } from '../lib/useAdminQuery';
 
 type Tab = 'pending' | 'approved' | 'rejected';
@@ -46,12 +47,7 @@ const QUICK_REASONS = [
 ];
 
 function when(iso: string | null) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  const mins = Math.round((Date.now() - d.getTime()) / 60_000);
-  if (mins < 60) return `${Math.max(1, mins)} min ago`;
-  if (mins < 24 * 60) return `${Math.round(mins / 60)} h ago`;
-  return d.toLocaleString();
+  return formatRelative(iso);
 }
 
 function plate(v: string | null) {
@@ -72,7 +68,7 @@ export function KycReviewPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
-  const [alerts, setAlerts] = useState(desktopAlertsState());
+  const alerts = useAlertStatus();
 
   // Document links expire after 5 minutes — quietly fetch fresh ones while the review is open.
   useEffect(() => {
@@ -149,7 +145,7 @@ export function KycReviewPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">KYC review</h1>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">KYC review</h1>
         <div className="flex rounded-xl border border-[var(--prila-border)] bg-white p-1 text-sm" role="tablist">
           {(['pending', 'approved', 'rejected'] as Tab[]).map((t) => (
             <button
@@ -167,17 +163,19 @@ export function KycReviewPage() {
             </button>
           ))}
         </div>
-        {alerts === 'default' ? (
-          <button
-            type="button"
-            className="ml-auto rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-medium text-[var(--prila-purple)]"
-            onClick={async () => setAlerts(await enableDesktopAlerts())}
-          >
-            Turn on desktop alerts for new KYC
+        {alerts === 'off' ? (
+          <button type="button" className="btn btn-soft ml-auto" onClick={() => void turnOnAlerts()}>
+            Alert me about new KYC
           </button>
-        ) : alerts === 'denied' ? (
-          <span className="ml-auto text-xs text-[var(--prila-muted)]">
-            Desktop alerts are blocked in this browser. The red count in the menu still updates.
+        ) : alerts === 'blocked' ? (
+          <span className="ml-auto max-w-xs text-right text-xs text-[var(--prila-muted)]">
+            Notifications are blocked in this browser. Allow them in the site settings, then turn alerts on under
+            Settings.
+          </span>
+        ) : alerts === 'on' ? (
+          <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            KYC alerts on
           </span>
         ) : null}
       </div>
@@ -216,7 +214,7 @@ export function KycReviewPage() {
           ))}
         </ul>
 
-        <section className="min-h-[420px] rounded-2xl border border-[var(--prila-border)] bg-white p-5">
+        <section className="surface min-h-[420px] p-5">
           {!selectedId ? (
             <p className="text-sm text-[var(--prila-muted)]">Pick a pilot on the left to see their documents.</p>
           ) : detail.loading && !d ? (
@@ -227,11 +225,11 @@ export function KycReviewPage() {
             <div className="space-y-5">
               <header className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-bold">{d.name ?? 'No name'}</h2>
+                  <h2 className="text-xl font-semibold">{d.name ?? 'No name'}</h2>
                   <p className="text-sm text-[var(--prila-muted)]">
                     {d.phone} · {d.city ?? 'No city'} · <span className="capitalize">{d.vehicleType}</span>
                   </p>
-                  <p className="mt-2 inline-block rounded-lg border-2 border-slate-800 bg-amber-50 px-3 py-1 font-mono text-lg font-bold tracking-widest">
+                  <p className="mt-2 inline-block rounded-lg border-2 border-slate-800 bg-amber-50 px-3 py-1 font-mono text-lg font-semibold tracking-widest">
                     {plate(d.vehicleNumber)}
                   </p>
                 </div>
@@ -292,7 +290,7 @@ export function KycReviewPage() {
               </div>
 
               {d.status === 'rejected' && d.rejectReason ? (
-                <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">Rejected: {d.rejectReason}</p>
+                <p className="alert alert-danger">Rejected: {d.rejectReason}</p>
               ) : null}
 
               {d.status === 'pending' ? (
@@ -306,7 +304,7 @@ export function KycReviewPage() {
                         <button
                           key={q}
                           type="button"
-                          className="rounded-full border border-red-200 bg-white px-3 py-1 text-xs hover:bg-red-50"
+                          className="btn btn-danger-soft btn-sm"
                           onClick={() => setReason(q)}
                         >
                           {q.split(' — ')[0]}
@@ -317,7 +315,7 @@ export function KycReviewPage() {
                       id="kyc-reason"
                       rows={3}
                       maxLength={500}
-                      className="w-full rounded-xl border border-red-200 bg-white px-3 py-2 text-sm"
+                      className="field field-bad w-full"
                       placeholder="e.g. RC photo is blurred — please upload a clear photo"
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
@@ -327,13 +325,13 @@ export function KycReviewPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                        className="btn btn-danger"
                         disabled={busy || reason.trim().length < 5}
                         onClick={() => void reject()}
                       >
                         {busy ? 'Rejecting…' : 'Reject documents'}
                       </button>
-                      <button type="button" className="rounded-xl border px-4 py-2 text-sm" onClick={() => setRejecting(false)}>
+                      <button type="button" className="btn btn-secondary" onClick={() => setRejecting(false)}>
                         Back
                       </button>
                     </div>
@@ -343,7 +341,7 @@ export function KycReviewPage() {
                     {err ? <p className="w-full text-sm text-red-600">{err}</p> : null}
                     <button
                       type="button"
-                      className="rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                      className="btn btn-success"
                       disabled={busy}
                       onClick={() => setApproveOpen(true)}
                     >
@@ -351,7 +349,7 @@ export function KycReviewPage() {
                     </button>
                     <button
                       type="button"
-                      className="rounded-xl border border-red-300 px-5 py-2.5 text-sm font-semibold text-red-700"
+                      className="btn btn-danger-soft"
                       onClick={() => {
                         setRejecting(true);
                         setErr(null);

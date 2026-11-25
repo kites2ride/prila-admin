@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_MAP_ID?: string;
 }
 
+declare const __APP_VERSION__: string;
+
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }

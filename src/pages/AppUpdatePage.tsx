@@ -3,6 +3,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Card, Field, inputCls } from '../components/formKit';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 type AppKey = 'customer' | 'pilot';
 type Platform = 'android' | 'ios';
@@ -175,11 +176,11 @@ export function AppUpdatePage() {
   if (cfgQ.error || metaQ.error) {
     return (
       <div className="mx-auto max-w-3xl space-y-3">
-        <h1 className="text-xl font-semibold">App update policy</h1>
-        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{cfgQ.error ?? metaQ.error}</div>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">App update policy</h1>
+        <div className="alert alert-danger">{cfgQ.error ?? metaQ.error}</div>
         <button
           type="button"
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm"
+          className="btn btn-secondary"
           onClick={() => {
             cfgQ.reload();
             metaQ.reload();
@@ -193,8 +194,8 @@ export function AppUpdatePage() {
   if (!form || !saved || !meta || !errors) {
     return (
       <div className="mx-auto max-w-3xl space-y-1">
-        <h1 className="text-xl font-semibold">App update policy</h1>
-        <p className="text-sm text-slate-500">Loading…</p>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">App update policy</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">Loading…</p>
       </div>
     );
   }
@@ -253,25 +254,25 @@ export function AppUpdatePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <div>
-        <h1 className="text-xl font-semibold">App update policy</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">App update policy</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">
           Control which app builds may keep running. Build numbers are the integer build (versionCode / CFBundleVersion),
           not the version name.
         </p>
         <p className="text-xs text-slate-400">Current version: {version}</p>
       </div>
 
-      <div className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
+      <div className="alert alert-warn">
         <b>Minimum build</b> forces an update — older installs are locked out until they update. <b>Latest build</b> only
         shows an optional prompt. Set 0 to turn a rule off. Never set a build that is not yet live in the store.
       </div>
 
       {err ? (
-        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <div className="alert alert-danger" role="alert">
           {err}
         </div>
       ) : null}
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
+      <MsgToast msg={msg} />
 
       {APPS.map((a) => (
         <Card key={a} title={APP_LABEL[a]}>
@@ -287,7 +288,7 @@ export function AppUpdatePage() {
                   <p className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                     {PLATFORM_LABEL[p]}
                     {forced ? (
-                      <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                      <span className="badge badge-danger">
                         Forced update active
                       </span>
                     ) : null}
@@ -339,7 +340,7 @@ export function AppUpdatePage() {
           type="button"
           disabled={saving || !dirty}
           onClick={onSave}
-          className="rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="btn btn-primary"
         >
           {saving ? 'Saving…' : 'Save changes'}
         </button>
@@ -347,7 +348,7 @@ export function AppUpdatePage() {
           type="button"
           disabled={saving || !dirty}
           onClick={discard}
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm disabled:opacity-50"
+          className="btn btn-secondary"
         >
           Discard
         </button>

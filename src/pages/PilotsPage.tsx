@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ListPage } from '../components/ListPage';
+import { Avatar, StatusBadge, statusLabel } from '../components/ui';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatInr } from '../lib/format';
 
 type PilotRow = {
   id: string;
@@ -33,10 +35,6 @@ type Wallet = {
   lifetimeCommissionPaise: number;
   lifetimeTrips: number;
 };
-
-function inr(paise: number) {
-  return `₹${(paise / 100).toFixed(0)}`;
-}
 
 export function PilotsPage() {
   const [page, setPage] = useStickyState('pilots_page', 1);
@@ -114,61 +112,75 @@ export function PilotsPage() {
         error={error}
         filters={
           <select
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="field"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
               setPage(1);
             }}
           >
-            <option value="">All</option>
+            <option value="">All statuses</option>
             {['active', 'suspended', 'deleted'].map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </select>
         }
       >
         <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="surface overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+              <thead className="bg-slate-50 text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Pilot</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Rating</th>
-                  <th className="px-4 py-3">Dues</th>
+                  <th className="px-4 py-3 text-right">Rating</th>
+                  <th className="px-4 py-3 text-right">Dues</th>
                 </tr>
               </thead>
               <tbody>
                 {(data?.items ?? []).map((row) => (
                   <tr
                     key={row.id}
-                    className={`cursor-pointer border-t border-slate-100 ${
-                      selectedId === row.id ? 'bg-violet-50' : 'hover:bg-slate-50'
-                    }`}
+                    className={`cursor-pointer focus-visible:bg-violet-50 ${selectedId === row.id ? 'bg-violet-50' : ''}`}
+                    tabIndex={0}
+                    aria-selected={selectedId === row.id}
                     onClick={() => setSelectedId(row.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedId(row.id);
+                      }
+                    }}
                   >
                     <td className="px-4 py-3">
-                      <div className="font-medium">{row.name || row.phone}</div>
-                      <div className="text-xs text-slate-500">
-                        {row.vehicleType ?? '—'} · {row.kycStatus ?? '—'}
-                        {row.online ? ' · online' : ''}
+                      <div className="flex items-center gap-3">
+                        <Avatar name={row.name || row.phone || '?'} />
+                        <div className="min-w-0">
+                          <div className="truncate font-semibold text-[var(--prila-ink)]">{row.name || row.phone}</div>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                            <span className="capitalize">{row.vehicleType ?? '—'}</span>
+                            <StatusBadge status={row.kycStatus ? `KYC ${row.kycStatus}` : null} />
+                            {row.online ? <span className="badge badge-success">Online</span> : null}
+                          </div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{row.status}</td>
                     <td className="px-4 py-3">
+                      <StatusBadge status={row.status} />
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
                       {row.ratingAvg != null ? `${row.ratingAvg.toFixed(1)} (${row.ratingCount ?? 0})` : '—'}
                     </td>
-                    <td className="px-4 py-3 font-medium">{inr(row.duesPaise)}</td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">{formatInr(row.duesPaise)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="surface p-4">
             {!selected ? (
               <p className="text-sm text-slate-500">Select a pilot to view wallet and actions.</p>
             ) : (
@@ -183,11 +195,11 @@ export function PilotsPage() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="rounded-xl bg-slate-50 p-3">
                     <div className="text-xs text-slate-500">Balance</div>
-                    <div className="font-semibold">{inr(walletQ.data?.balancePaise ?? selected.balancePaise)}</div>
+                    <div className="font-semibold">{formatInr(walletQ.data?.balancePaise ?? selected.balancePaise)}</div>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <div className="text-xs text-slate-500">Dues</div>
-                    <div className="font-semibold">{inr(walletQ.data?.duesPaise ?? selected.duesPaise)}</div>
+                    <div className="font-semibold">{formatInr(walletQ.data?.duesPaise ?? selected.duesPaise)}</div>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <div className="text-xs text-slate-500">Lifetime trips</div>
@@ -195,14 +207,14 @@ export function PilotsPage() {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <div className="text-xs text-slate-500">Lifetime net</div>
-                    <div className="font-semibold">{inr(walletQ.data?.lifetimeNetPaise ?? 0)}</div>
+                    <div className="font-semibold">{formatInr(walletQ.data?.lifetimeNetPaise ?? 0)}</div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   {selected.status === 'suspended' ? (
                     <button
                       type="button"
-                      className="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
+                      className="btn btn-success"
                       disabled={busy}
                       onClick={() => setUnsuspendOpen(true)}
                     >
@@ -211,7 +223,7 @@ export function PilotsPage() {
                   ) : (
                     <button
                       type="button"
-                      className="rounded-xl bg-red-600 px-3 py-2 text-sm font-medium text-white"
+                      className="btn btn-danger"
                       disabled={busy}
                       onClick={() => setSuspendOpen(true)}
                     >
@@ -220,7 +232,7 @@ export function PilotsPage() {
                   )}
                   <button
                     type="button"
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="btn btn-secondary"
                     disabled={busy || (walletQ.data?.duesPaise ?? selected.duesPaise) <= 0}
                     onClick={() => setDuesOpen(true)}
                   >
@@ -252,14 +264,14 @@ export function PilotsPage() {
       {duesOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-            <h2 className="text-lg font-semibold text-slate-900">Settle dues</h2>
+            <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Settle dues</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Outstanding: {inr(walletQ.data?.duesPaise ?? selected?.duesPaise ?? 0)}
+              Outstanding: {formatInr(walletQ.data?.duesPaise ?? selected?.duesPaise ?? 0)}
             </p>
             <label className="mt-3 block text-sm">
               Amount (₹)
               <input
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                className="field mt-1 w-full"
                 value={duesRupees}
                 onChange={(e) => setDuesRupees(e.target.value)}
                 inputMode="numeric"
@@ -268,14 +280,14 @@ export function PilotsPage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm"
+                className="btn btn-secondary"
                 onClick={() => setDuesOpen(false)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white"
+                className="btn btn-primary"
                 disabled={busy}
                 onClick={() => void settleDues()}
               >

@@ -42,10 +42,23 @@ export function ConfirmDialog({
   if (!open) return null;
   const locked = Boolean(requireText) && typed.trim() !== requireText;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="presentation">
-      <div role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 max-h-[50vh] overflow-y-auto text-sm text-slate-600 whitespace-pre-wrap">{body}</p>
+    <div
+      className="prila-fade fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-black/50 p-4"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onCancel();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="prila-pop w-full max-w-md rounded-xl border border-[var(--prila-border)] bg-white p-6 shadow-[var(--prila-shadow-pop)]"
+      >
+        <h2 className="text-lg font-semibold text-[var(--prila-ink)]">{title}</h2>
+        <p className="mt-2 max-h-[50vh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+          {body}
+        </p>
         {requireText ? (
           <div className="mt-4">
             <label htmlFor={inputId} className="text-xs text-slate-600">
@@ -55,22 +68,21 @@ export function ConfirmDialog({
               id={inputId}
               autoFocus
               autoComplete="off"
+              spellCheck={false}
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-violet-300"
+              className="field mt-1 w-full"
             />
           </div>
         ) : null}
-        <div className="mt-5 flex justify-end gap-2">
-          <button type="button" className="rounded-xl border border-slate-200 px-4 py-2 text-sm" onClick={onCancel}>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" className="btn btn-secondary" onClick={onCancel}>
             Cancel
           </button>
           <button
             type="button"
             disabled={locked}
-            className={`rounded-xl px-4 py-2 text-sm font-medium text-white disabled:opacity-40 ${
-              danger ? 'bg-red-600' : 'bg-violet-600'
-            }`}
+            className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`}
             onClick={onConfirm}
           >
             {confirmLabel}

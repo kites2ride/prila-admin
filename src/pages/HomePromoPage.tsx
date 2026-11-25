@@ -3,6 +3,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Card, Field, Toggle, inputCls } from '../components/formKit';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 /* ───────────── types (mirror backend homePromoValueSchema) ───────────── */
 
@@ -230,7 +231,7 @@ function PromoPreview({ form, app }: { form: Form; app: AppKey }) {
               />
             ) : null}
             <div className="space-y-1 p-3">
-              {title ? <p className="text-sm font-bold text-slate-900 break-words">{title}</p> : null}
+              {title ? <p className="text-sm font-semibold text-slate-900 break-words">{title}</p> : null}
               {body ? <p className="text-xs text-slate-600 break-words">{body}</p> : null}
               {cta ? (
                 <span className="mt-2 inline-block rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
@@ -373,8 +374,8 @@ export function HomePromoPage() {
     <div className="mx-auto max-w-5xl space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Home promo</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Home promo</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
             Banner shown on the app home screen. Apps read it through bootstrap; changes reach users within ~1 minute.
           </p>
           {version !== null ? <p className="text-xs text-slate-400">Current version: {version}</p> : null}
@@ -388,7 +389,7 @@ export function HomePromoPage() {
               aria-selected={which === a}
               onClick={() => setWhich(a)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 capitalize ${
-                which === a ? 'bg-violet-600 text-white' : 'text-slate-600'
+                which === a ? 'bg-[var(--prila-ink)] text-white shadow-sm' : 'text-slate-600'
               }`}
             >
               {a}
@@ -401,13 +402,13 @@ export function HomePromoPage() {
         </div>
       </div>
 
-      {error ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
+      {error ? <div className="alert alert-danger">{error}</div> : null}
       {err ? (
-        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <div className="alert alert-danger" role="alert">
           {err}
         </div>
       ) : null}
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
+      <MsgToast msg={msg} />
       {loading && !data ? <div className="text-sm text-slate-500">Loading…</div> : null}
 
       <fieldset disabled={loading && !data} className="grid gap-5 lg:grid-cols-[1fr_340px]">
@@ -624,7 +625,7 @@ export function HomePromoPage() {
           type="button"
           disabled={saving || !dirty}
           onClick={onSaveClick}
-          className="rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="btn btn-primary"
         >
           {saving ? 'Saving…' : 'Save changes'}
         </button>
@@ -632,7 +633,7 @@ export function HomePromoPage() {
           type="button"
           disabled={saving || !dirty}
           onClick={discard}
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm disabled:opacity-50"
+          className="btn btn-secondary"
         >
           Discard
         </button>
@@ -641,7 +642,7 @@ export function HomePromoPage() {
           disabled={saving || dirty}
           onClick={reload}
           title={dirty ? 'Save or discard your changes first' : 'Reload from server'}
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm disabled:opacity-50"
+          className="btn btn-secondary"
         >
           Refresh
         </button>

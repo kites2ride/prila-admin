@@ -1,6 +1,7 @@
 import { ListPage } from '../components/ListPage';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatDateTime } from '../lib/format';
 
 type AuditList = {
   items: Array<{
@@ -30,9 +31,9 @@ export function AuditPage() {
       loading={loading}
       error={error}
     >
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="surface overflow-x-auto">
         <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+          <thead className="bg-slate-50 text-xs text-slate-500">
             <tr>
               <th className="px-4 py-3">When</th>
               <th className="px-4 py-3">Actor</th>
@@ -43,7 +44,7 @@ export function AuditPage() {
           <tbody>
             {(data?.items ?? []).map((row) => (
               <tr key={row.id} className="border-t border-slate-100">
-                <td className="px-4 py-3 text-slate-500">{new Date(row.at).toLocaleString()}</td>
+                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{formatDateTime(row.at)}</td>
                 <td className="px-4 py-3">{row.actor}</td>
                 <td className="px-4 py-3">{row.action}</td>
                 <td className="px-4 py-3 text-slate-500">{row.key ?? '—'}</td>

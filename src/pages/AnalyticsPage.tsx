@@ -1,6 +1,7 @@
 import { ListPage } from '../components/ListPage';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatDateTime } from '../lib/format';
 
 type Row = {
   id: string;
@@ -26,13 +27,13 @@ export function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Analytics</h1>
-        <p className="mt-1 text-sm text-[var(--prila-muted)]">Events + permission coverage</p>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Analytics</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">Events + permission coverage</p>
       </div>
 
       {perms.data ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--prila-border)] bg-white p-4">
+          <div className="surface p-4">
             <div className="font-semibold">Rider permissions</div>
             <div className="mt-2 text-sm text-[var(--prila-muted)]">Total {perms.data.riders.total}</div>
             <div className="mt-1 text-sm">
@@ -43,7 +44,7 @@ export function AnalyticsPage() {
               Notif granted {perms.data.riders.notifGranted ?? 0} · denied {perms.data.riders.notifDenied ?? 0}
             </div>
           </div>
-          <div className="rounded-2xl border border-[var(--prila-border)] bg-white p-4">
+          <div className="surface p-4">
             <div className="font-semibold">Pilot permissions</div>
             <div className="mt-2 text-sm text-[var(--prila-muted)]">Total {perms.data.pilots.total}</div>
             <div className="mt-1 text-sm">
@@ -66,9 +67,9 @@ export function AnalyticsPage() {
         loading={loading}
         error={error}
       >
-        <div className="overflow-hidden rounded-2xl border border-[var(--prila-border)] bg-white">
+        <div className="surface overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-[var(--prila-bg)] text-xs uppercase text-[var(--prila-muted)]">
+            <thead className="bg-[var(--prila-bg)] text-xs text-[var(--prila-muted)]">
               <tr>
                 <th className="px-4 py-3">When</th>
                 <th className="px-4 py-3">App</th>
@@ -79,8 +80,8 @@ export function AnalyticsPage() {
             <tbody>
               {(data?.items ?? []).map((row) => (
                 <tr key={row.id} className="border-t border-[var(--prila-border)]">
-                  <td className="px-4 py-3 text-[var(--prila-muted)]">
-                    {row.at ? new Date(row.at).toLocaleString() : '—'}
+                  <td className="px-4 py-3 text-[var(--prila-muted)] whitespace-nowrap">
+                    {row.at ? formatDateTime(row.at) : '—'}
                   </td>
                   <td className="px-4 py-3">{row.app}</td>
                   <td className="px-4 py-3 font-medium">{row.name}</td>

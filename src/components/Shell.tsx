@@ -1,36 +1,10 @@
 import type { ReactNode } from 'react';
-import { clearSession, getEmail } from '../lib/session';
 import { navigate, type RouteId } from '../lib/pathRouter';
+import { ProfileMenu } from './ProfileMenu';
 import { useKycPending } from '../lib/kycAlerts';
-
-const NAV: { id: RouteId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'live-map', label: 'Live map' },
-  { id: 'kyc', label: 'KYC review' },
-  { id: 'app-config', label: 'App config' },
-  { id: 'dispatch', label: 'Dispatch' },
-  { id: 'surge', label: 'Surge heatmap' },
-  { id: 'maps', label: 'Maps (cost)' },
-  { id: 'pilot-quality', label: 'Pilot quality' },
-  { id: 'pilots', label: 'Pilots' },
-  { id: 'payouts', label: 'Payouts' },
-  { id: 'home-promo', label: 'Home promo' },
-  { id: 'push', label: 'Push' },
-  { id: 'reports', label: 'Reports' },
-  { id: 'analytics', label: 'Analytics' },
-  { id: 'nudges', label: 'Nudges' },
-  { id: 'sos', label: 'SOS' },
-  { id: 'support', label: 'Support' },
-  { id: 'maintenance', label: 'Maintenance' },
-  { id: 'app-update', label: 'App update' },
-  { id: 'cities', label: 'Cities' },
-  { id: 'zones', label: 'Zones (map)' },
-  { id: 'zone-rules', label: 'Zone rules' },
-  { id: 'landmarks', label: 'Landmarks' },
-  { id: 'services-fares', label: 'Services & fares' },
-  { id: 'rides', label: 'Rides' },
-  { id: 'audit', label: 'Audit log' },
-];
+import { NAV_GROUPS, iconFor } from '../lib/nav';
+import { CommandPalette } from './CommandPalette';
+import { Toaster } from './Toaster';
 
 type Props = {
   route: RouteId;
@@ -40,56 +14,94 @@ type Props = {
 export function Shell({ route, children }: Props) {
   const kycPending = useKycPending();
   return (
-    <div className="min-h-screen bg-[var(--prila-bg)] lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-[var(--prila-border)] bg-[var(--prila-surface)] lg:border-b-0 lg:border-r">
-        <div className="px-5 py-5">
-          <img src="/brand/prila-wordmark-light.svg" alt="Prila" className="h-8 w-auto" />
-          <div className="mt-1 text-xs text-[var(--prila-muted)]">Admin · Ops</div>
+    <div className="min-h-screen bg-[var(--prila-bg)] lg:grid lg:grid-cols-[248px_1fr]">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--prila-ink)] focus:px-3 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Skip to content
+      </a>
+      <aside className="border-b border-[var(--prila-border)] bg-[var(--prila-surface)] lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="flex items-center gap-3 px-5 py-4 lg:py-5">
+          <img src="/brand/prila-wordmark-light.svg" alt="Prila" className="logo-on-light h-7 w-auto" />
+          <img src="/brand/prila-wordmark-dark.svg" alt="Prila" className="logo-on-dark h-7 w-auto" />
+          <span className="rounded-md bg-[var(--prila-purple-soft)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--prila-purple)]">
+            Ops
+          </span>
         </div>
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible">
-          {NAV.map((item) => {
-            const active = route === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.id)}
-                className={`rounded-xl px-3 py-2 text-left text-sm whitespace-nowrap transition-colors ${
-                  active
-                    ? 'bg-violet-50 font-semibold text-[var(--prila-purple)]'
-                    : 'text-slate-600 hover:bg-[var(--prila-bg)]'
-                }`}
-              >
-                <span className="flex items-center justify-between gap-2">
-                  {item.label}
-                  {item.id === 'kyc' && kycPending ? (
-                    <span
-                      className="min-w-5 rounded-full bg-red-600 px-1.5 text-center text-xs font-bold leading-5 text-white"
-                      aria-label={`${kycPending} waiting for review`}
-                    >
-                      {kycPending > 99 ? '99+' : kycPending}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-        <div className="hidden border-t border-slate-100 px-5 py-4 lg:block">
-          <div className="truncate text-xs text-slate-500">{getEmail()}</div>
+        <div className="hidden px-3 pb-3 lg:block">
           <button
             type="button"
-            className="mt-2 text-sm font-medium text-red-600"
-            onClick={() => {
-              clearSession();
-              navigate('login');
-            }}
+            onClick={() => window.dispatchEvent(new Event('prila:palette'))}
+            className="flex w-full items-center justify-between rounded-lg border border-[var(--prila-border)] bg-[var(--prila-surface-2)] px-3 py-1.5 text-[13px] text-slate-500 hover:border-slate-300"
           >
-            Log out
+            Jump to…
+            <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+              Ctrl K
+            </kbd>
           </button>
         </div>
+        <nav
+          aria-label="Main"
+          className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:gap-0 lg:overflow-y-auto lg:overflow-x-hidden lg:pb-4"
+        >
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="flex gap-1 lg:mb-4 lg:block lg:space-y-0.5">
+              <div className="hidden px-3 pb-1 text-xs font-medium text-slate-400 lg:block">
+                {group.label}
+              </div>
+              {group.items.map((item) => {
+                const active = route === item.id;
+                const Icon = iconFor(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={active ? 'page' : undefined}
+                    onClick={() => navigate(item.id)}
+                    className={`block w-full rounded-md px-2.5 py-1.5 text-left text-[13px] whitespace-nowrap ${
+                      active
+                        ? 'bg-[var(--prila-purple-soft)] font-semibold text-[var(--prila-purple)]'
+                        : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Icon
+                        size={16}
+                        strokeWidth={1.85}
+                        aria-hidden={true}
+                        className={active ? 'text-[var(--prila-purple)]' : 'text-slate-500'}
+                      />
+                      <span className="flex-1">{item.label}</span>
+                      {item.id === 'kyc' && kycPending ? (
+                        <span
+                          className="min-w-5 rounded-full bg-red-600 px-1.5 text-center text-[11px] font-semibold leading-5 text-white"
+                          aria-label={`${kycPending} waiting for review`}
+                        >
+                          {kycPending > 99 ? '99+' : kycPending}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+        <div className="mono hidden border-t border-[var(--prila-border-soft)] px-5 py-3 text-[11px] text-slate-400 lg:block">
+          Prila Admin v{__APP_VERSION__}
+        </div>
       </aside>
-      <main className="p-4 md:p-8">{children}</main>
+      <CommandPalette />
+      <Toaster />
+      <div className="min-w-0">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-end border-b border-[var(--prila-border)] bg-[var(--prila-bg)]/90 px-4 backdrop-blur md:px-8">
+          <ProfileMenu />
+        </header>
+        <main id="main" className="min-w-0 p-4 md:p-8">
+          <div className="mx-auto max-w-[1400px]">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

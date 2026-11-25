@@ -60,7 +60,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4" aria-labelledby="pricing-times">
+    <section className="surface p-4" aria-labelledby="pricing-times">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="pricing-times" className="font-semibold">
           Pricing times · {city.name}
@@ -80,7 +80,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
             <input
               type="time"
               aria-label="Night starts"
-              className="rounded-lg border px-3 py-2 text-sm"
+              className="field"
               value={p.nightStart}
               onChange={(e) => setP({ ...p, nightStart: e.target.value })}
             />
@@ -88,7 +88,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
             <input
               type="time"
               aria-label="Night ends"
-              className="rounded-lg border px-3 py-2 text-sm"
+              className="field"
               value={p.nightEnd}
               onChange={(e) => setP({ ...p, nightEnd: e.target.value })}
             />
@@ -108,7 +108,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
                 <input
                   type="time"
                   aria-label={`Rush hour ${i + 1} starts`}
-                  className="rounded-lg border px-2 py-2 text-sm"
+                  className="field"
                   value={b.start}
                   onChange={(e) => setBand(i, { start: e.target.value })}
                 />
@@ -116,13 +116,13 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
                 <input
                   type="time"
                   aria-label={`Rush hour ${i + 1} ends`}
-                  className="rounded-lg border px-2 py-2 text-sm"
+                  className="field"
                   value={b.end}
                   onChange={(e) => setBand(i, { end: e.target.value })}
                 />
                 <select
                   aria-label={`Rush hour ${i + 1} multiplier`}
-                  className="rounded-lg border px-2 py-2 text-sm"
+                  className="field"
                   value={b.multiplier}
                   onChange={(e) => setBand(i, { multiplier: Number(e.target.value) })}
                 >
@@ -134,7 +134,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
                 </select>
                 <button
                   type="button"
-                  className="rounded-full px-3 py-2 text-sm text-red-700 hover:bg-red-50"
+                  className="btn btn-danger-soft"
                   onClick={() => setP({ ...p, rushHours: p.rushHours.filter((_, j) => j !== i) })}
                 >
                   Remove
@@ -145,7 +145,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
           {p.rushHours.length < 6 ? (
             <button
               type="button"
-              className="mt-2 rounded-full border px-3 py-2 text-sm"
+              className="btn btn-secondary mt-2"
               onClick={() =>
                 setP({
                   ...p,
@@ -165,7 +165,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
           <legend className="text-sm font-medium">Overall cap</legend>
           <select
             aria-label="Overall price cap"
-            className="mt-2 rounded-lg border px-3 py-2 text-sm"
+            className="field mt-2"
             value={p.maxMultiplier}
             onChange={(e) => setP({ ...p, maxMultiplier: Number(e.target.value) })}
           >
@@ -185,7 +185,7 @@ export function CityPricingCard({ city, onSaved }: { city: CityLike; onSaved: ()
         <button
           type="button"
           disabled={saving}
-          className="rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="btn btn-primary"
           onClick={() => void save()}
         >
           {saving ? 'Saving…' : 'Save pricing times'}

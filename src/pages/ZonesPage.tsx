@@ -4,6 +4,7 @@ import { adminFetch, AdminApiError } from '../lib/adminFetch';
 import { loadGoogleMaps, MAP_ID, mapsConfigured } from '../lib/googleMaps';
 import { areaKm2, fromGeoJson, parseLatLng, toGeoJson, validateZone, type LatLng } from '../lib/polygon';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 type ServiceType = 'bike' | 'auto' | 'parcel' | 'logistics';
 const SERVICES: ServiceType[] = ['bike', 'auto', 'parcel', 'logistics'];
@@ -383,14 +384,14 @@ export function ZonesPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Zones</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Zones</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
             Green = service (rides allowed). Red = blocked (no pickups). Grey = disabled. The server enforces these on
             estimate, booking and pilot go-online.
           </p>
         </div>
         <select
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+          className="field"
           value={activeCityId}
           onChange={(e) => {
             cancelEdit();
@@ -406,15 +407,15 @@ export function ZonesPage() {
       </div>
 
       {enforcement && !enforcement.active ? (
-        <div className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="alert alert-warn">
           {!enforcement.serviceZonesExist
             ? 'No enabled service zone exists yet, so the service area is NOT enforced (riders can book anywhere). Draw at least one service zone to turn it on.'
             : 'Enforcement is switched off in Zone rules (zones.enforce = false). Zones are shown but not applied.'}
         </div>
       ) : null}
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
-      {err ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{err}</div> : null}
-      {zonesQ.error ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{zonesQ.error}</div> : null}
+      <MsgToast msg={msg} />
+      {err ? <div className="alert alert-danger">{err}</div> : null}
+      {zonesQ.error ? <div className="alert alert-danger">{zonesQ.error}</div> : null}
 
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
         <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
@@ -425,7 +426,7 @@ export function ZonesPage() {
               {mapsConfigured() ? (
                 <button
                   type="button"
-                  className="rounded-full bg-violet-600 px-4 py-2 font-medium text-white"
+                  className="btn btn-primary"
                   onClick={() => setMapsAttempt((n) => n + 1)}
                 >
                   Retry
@@ -451,9 +452,9 @@ export function ZonesPage() {
         <div className="space-y-4">
           {editingId !== undefined ? (
             <section className="space-y-3 rounded-2xl border border-violet-200 bg-white p-4">
-              <h2 className="font-semibold">{editingId ? `Edit zone (v${editingZone?.version ?? 1})` : 'New zone'}</h2>
+              <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">{editingId ? `Edit zone (v${editingZone?.version ?? 1})` : 'New zone'}</h2>
               <input
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field w-full"
                 placeholder="Name, e.g. Hanamkonda core"
                 value={form.name}
                 maxLength={80}
@@ -461,7 +462,7 @@ export function ZonesPage() {
               />
               <div className="grid grid-cols-2 gap-2">
                 <select
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="field"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as Form['type'] })}
                 >
@@ -469,7 +470,7 @@ export function ZonesPage() {
                   <option value="blocked">Blocked (no pickups)</option>
                 </select>
                 <select
-                  className="col-span-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="field"
                   value={form.cityId || activeCityId}
                   onChange={(e) => setForm({ ...form, cityId: e.target.value })}
                   aria-label="City this zone belongs to"
@@ -481,7 +482,7 @@ export function ZonesPage() {
                   ))}
                 </select>
                 <input
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="field"
                   placeholder="District (optional)"
                   value={form.district}
                   maxLength={60}
@@ -523,7 +524,7 @@ export function ZonesPage() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-40"
+                  className="btn btn-secondary btn-sm"
                   disabled={points.length === 0}
                   onClick={() => editPoly.current?.getPath().pop()}
                 >
@@ -531,7 +532,7 @@ export function ZonesPage() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-40"
+                  className="btn btn-secondary btn-sm"
                   disabled={points.length === 0}
                   onClick={() => {
                     editPoly.current?.getPath().clear();
@@ -552,24 +553,24 @@ export function ZonesPage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  className="flex-1 rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="btn btn-primary flex-1"
                   disabled={Boolean(shapeError || formError) || saving}
                   onClick={() => setConfirmOpen(true)}
                 >
                   {saving ? 'Saving…' : 'Save'}
                 </button>
-                <button type="button" className="rounded-full border border-slate-200 px-4 py-2 text-sm" onClick={cancelEdit}>
+                <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
                   Cancel
                 </button>
               </div>
             </section>
           ) : (
-            <section className="rounded-2xl border border-slate-200 bg-white p-4">
+            <section className="surface p-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold">Zones in {city?.name ?? '…'}</h2>
+                <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Zones in {city?.name ?? '…'}</h2>
                 <button
                   type="button"
-                  className="rounded-full bg-violet-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                  className="btn btn-primary btn-sm"
                   disabled={!mapsReady || !activeCityId}
                   onClick={() => startEdit(null)}
                 >
@@ -585,7 +586,7 @@ export function ZonesPage() {
                   <li key={z.id}>
                     <button
                       type="button"
-                      className="w-full rounded-xl border border-slate-100 px-3 py-2 text-left hover:bg-slate-50 disabled:opacity-50"
+                      className="btn btn-secondary w-full"
                       disabled={!mapsReady}
                       onClick={() => startEdit(z)}
                     >
@@ -607,23 +608,23 @@ export function ZonesPage() {
             </section>
           )}
 
-          <section className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
-            <h2 className="font-semibold">Test a point</h2>
+          <section className="surface space-y-2 p-4">
+            <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Test a point</h2>
             <div className="flex gap-2">
               <input
-                className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="field min-w-0 flex-1"
                 placeholder="17.9950, 79.5560"
                 value={testText}
                 onChange={(e) => setTestText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && testFromText()}
               />
-              <button type="button" className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" onClick={testFromText}>
+              <button type="button" className="btn btn-primary" onClick={testFromText}>
                 Test
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <select
-                className="rounded-lg border border-slate-200 px-2 py-2 text-sm"
+                className="field"
                 value={testRole}
                 onChange={(e) => setTestRole(e.target.value as typeof testRole)}
               >
@@ -632,7 +633,7 @@ export function ZonesPage() {
                 <option value="pilot">as pilot going online</option>
               </select>
               <select
-                className="rounded-lg border border-slate-200 px-2 py-2 text-sm"
+                className="field"
                 value={testService}
                 onChange={(e) => setTestService(e.target.value as ServiceType | '')}
               >
@@ -677,7 +678,7 @@ export function ZonesPage() {
             ) : null}
           </section>
 
-          <section className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
+          <section className="surface space-y-2 p-4">
             <label className="flex items-center gap-2 text-sm font-semibold">
               <input type="checkbox" checked={showDemand} onChange={(e) => setShowDemand(e.target.checked)} />
               Demand outside zones (last 7 days)

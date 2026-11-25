@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { ListPage } from '../components/ListPage';
+import { StatusBadge, statusLabel } from '../components/ui';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatDateTime, formatInr } from '../lib/format';
 
 type Payout = {
   id: string;
@@ -16,10 +18,6 @@ type Payout = {
 };
 
 type PayoutList = { items: Payout[]; page: number; limit: number; total: number };
-
-function inr(paise: number) {
-  return `₹${(paise / 100).toFixed(0)}`;
-}
 
 export function PayoutsPage() {
   const [page, setPage] = useStickyState('payouts_page', 1);
@@ -54,29 +52,29 @@ export function PayoutsPage() {
         error={error}
         filters={
           <select
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="field"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
               setPage(1);
             }}
           >
-            <option value="">All</option>
+            <option value="">All statuses</option>
             {['requested', 'approved', 'paid', 'rejected'].map((s) => (
               <option key={s} value={s}>
-                {s}
+                {statusLabel(s)}
               </option>
             ))}
           </select>
         }
       >
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="surface overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className="bg-slate-50 text-xs text-slate-500">
               <tr>
                 <th className="px-4 py-3">When</th>
                 <th className="px-4 py-3">Pilot</th>
-                <th className="px-4 py-3">Amount</th>
+                <th className="px-4 py-3 text-right">Amount</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
@@ -84,12 +82,14 @@ export function PayoutsPage() {
             <tbody>
               {(data?.items ?? []).map((row) => (
                 <tr key={row.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 text-slate-500">
-                    {row.createdAt ? new Date(row.createdAt).toLocaleString() : '—'}
+                  <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    {row.createdAt ? formatDateTime(row.createdAt) : '—'}
                   </td>
-                  <td className="px-4 py-3 break-all text-xs">{row.pilotId}</td>
-                  <td className="px-4 py-3 font-medium">{inr(row.amountPaise)}</td>
-                  <td className="px-4 py-3">{row.status}</td>
+                  <td className="mono px-4 py-3 break-all text-xs text-slate-600">{row.pilotId}</td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums">{formatInr(row.amountPaise)}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={row.status} />
+                  </td>
                   <td className="px-4 py-3 space-x-2">
                     {row.status === 'requested' ? (
                       <>
@@ -138,7 +138,7 @@ export function PayoutsPage() {
       <ConfirmDialog
         open={Boolean(action && selected)}
         title={`${action} payout?`}
-        body={selected ? `${inr(selected.amountPaise)} for pilot ${selected.pilotId}` : ''}
+        body={selected ? `${formatInr(selected.amountPaise)} for pilot ${selected.pilotId}` : ''}
         confirmLabel="Confirm"
         onCancel={() => {
           setAction(null);

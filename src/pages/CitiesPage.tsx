@@ -3,6 +3,7 @@ import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { CenterPicker } from '../components/CenterPicker';
 import { CityPricingCard, type CityPricing } from './CityPricingCard';
+import { MsgToast } from '../components/Toaster';
 
 type City = {
   id: string;
@@ -62,24 +63,24 @@ export function CitiesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Cities</h1>
-        <p className="text-sm text-slate-500">
-          Draw where Prila operates on the <a className="font-medium text-violet-700 underline" href="#/zones">Zones (map)</a> page.
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Cities</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">
+          Draw where Prila operates on the <a className="link font-medium" href="#/zones">Zones (map)</a> page.
         </p>
       </div>
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
-      {err ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{err}</div> : null}
+      <MsgToast msg={msg} />
+      {err ? <div className="alert alert-danger">{err}</div> : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">Cities</h2>
+        <section className="surface p-4">
+          <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Cities</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {(citiesQ.data?.items ?? []).map((c) => (
               <li key={c.id}>
                 <button
                   type="button"
                   className={`w-full rounded-xl px-3 py-2 text-left ${
-                    c.id === cityId ? 'bg-violet-50 text-violet-800' : 'hover:bg-slate-50'
+                    c.id === cityId ? 'bg-[var(--prila-purple-soft)] font-semibold text-[var(--prila-purple)]' : 'hover:bg-slate-50'
                   }`}
                   onClick={() => {
                     setSelectedCityId(c.id);
@@ -101,13 +102,13 @@ export function CitiesPage() {
               </li>
             ))}
           </ul>
-          <form onSubmit={createCity} className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+          <form onSubmit={createCity} className="mt-4 space-y-3.5 border-t border-slate-100 pt-4">
             <div className="flex items-center justify-between text-sm font-medium">
               {editingId ? 'Edit city' : 'Add city'}
               {editingId ? (
                 <button
                   type="button"
-                  className="text-xs font-normal text-violet-700 underline"
+                  className="link font-medium"
                   onClick={() => {
                     setEditingId(null);
                     setCityForm({ name: '', slug: '', lat: '17.9689', lng: '79.5941', services: 'bike,auto,parcel,logistics' });
@@ -120,7 +121,7 @@ export function CitiesPage() {
             <label className="block text-xs font-medium text-slate-600">
               City name
               <input
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal"
+                className="field mt-1 w-full font-normal"
                 placeholder="e.g. Huzurabad"
                 value={cityForm.name}
                 onChange={(e) => setCityForm({ ...cityForm, name: e.target.value })}
@@ -130,7 +131,7 @@ export function CitiesPage() {
             <label className="block text-xs font-medium text-slate-600">
               Short ID (slug)
               <input
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal"
+                className="field mt-1 w-full font-normal"
                 placeholder={slugify(cityForm.name) || 'filled from the name'}
                 value={cityForm.slug}
                 onChange={(e) => setCityForm({ ...cityForm, slug: e.target.value.toLowerCase() })}
@@ -149,26 +150,26 @@ export function CitiesPage() {
             <label className="block text-xs font-medium text-slate-600">
               Services offered (comma separated)
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal"
+              className="field mt-1 w-full font-normal"
               placeholder="services csv"
               value={cityForm.services}
               onChange={(e) => setCityForm({ ...cityForm, services: e.target.value })}
             />
             </label>
-            <button type="submit" className="rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white">
+            <button type="submit" className="btn btn-primary">
               {editingId ? 'Save city' : 'Create city'}
             </button>
           </form>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">Zones</h2>
+        <section className="surface p-4">
+          <h2 className="text-[15px] font-semibold text-[var(--prila-ink)]">Zones</h2>
           <p className="mt-2 text-sm text-slate-600">
             Service and blocked zones are drawn and tested on the map, with validation, versioning and audit.
           </p>
           <a
             href="#/zones"
-            className="mt-4 inline-block rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white"
+            className="btn btn-primary mt-4"
           >
             Open Zones (map)
           </a>

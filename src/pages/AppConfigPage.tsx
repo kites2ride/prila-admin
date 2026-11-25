@@ -3,6 +3,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Card, Field, Toggle, inputCls } from '../components/formKit';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { MsgToast } from '../components/Toaster';
 
 /* ───────────── types ───────────── */
 
@@ -220,12 +221,12 @@ function AppConfigEditor({ app, onDirty }: { app: AppKey; onDirty: (d: boolean) 
   if (cfgQ.error || metaQ.error) {
     return (
       <div className="space-y-3">
-        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="alert alert-danger">
           {cfgQ.error ?? metaQ.error}
         </div>
         <button
           type="button"
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm"
+          className="btn btn-secondary"
           onClick={() => {
             cfgQ.reload();
             metaQ.reload();
@@ -304,11 +305,11 @@ function AppConfigEditor({ app, onDirty }: { app: AppKey; onDirty: (d: boolean) 
     <div className="space-y-5">
       <p className="text-xs text-slate-400">Current version: {version}</p>
       {err ? (
-        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+        <div className="alert alert-danger" role="alert">
           {err}
         </div>
       ) : null}
-      {msg ? <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div> : null}
+      <MsgToast msg={msg} />
 
       <Card
         title="Feature flags"
@@ -323,12 +324,12 @@ function AppConfigEditor({ app, onDirty }: { app: AppKey; onDirty: (d: boolean) 
                   <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-800">
                     {m?.label ?? k}
                     {m?.risk ? (
-                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                      <span className="badge badge-warn">
                         {RISK_LABEL[m.risk]}
                       </span>
                     ) : null}
                     {!m ? (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-500">
+                      <span className="badge">
                         Not in catalog
                       </span>
                     ) : null}
@@ -542,7 +543,7 @@ function AppConfigEditor({ app, onDirty }: { app: AppKey; onDirty: (d: boolean) 
           type="button"
           disabled={saving || !dirty}
           onClick={onSave}
-          className="rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="btn btn-primary"
         >
           {saving ? 'Saving…' : 'Save changes'}
         </button>
@@ -550,7 +551,7 @@ function AppConfigEditor({ app, onDirty }: { app: AppKey; onDirty: (d: boolean) 
           type="button"
           disabled={saving || !dirty}
           onClick={discard}
-          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm disabled:opacity-50"
+          className="btn btn-secondary"
         >
           Discard
         </button>
@@ -585,8 +586,8 @@ export function AppConfigPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">{which === 'customer' ? 'Customer' : 'Pilot'} app config</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">{which === 'customer' ? 'Customer' : 'Pilot'} app config</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
             {which === 'customer'
               ? 'Feature flags, languages and home screen layout.'
               : 'Feature flags, languages, location updates and KYC documents.'}
@@ -600,7 +601,7 @@ export function AppConfigPage() {
               role="tab"
               aria-selected={which === a}
               onClick={() => switchTo(a)}
-              className={`rounded-full px-4 py-1.5 capitalize ${which === a ? 'bg-violet-600 text-white' : 'text-slate-600'}`}
+              className={`rounded-full px-4 py-1.5 capitalize ${which === a ? 'bg-[var(--prila-ink)] text-white shadow-sm' : 'text-slate-600'}`}
             >
               {a}
             </button>

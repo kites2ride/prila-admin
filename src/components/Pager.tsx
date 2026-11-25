@@ -15,7 +15,7 @@ export function Pager({ page, limit, total, onPage }: Props) {
       <div className="flex gap-2">
         <button
           type="button"
-          className="rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-40"
+          className="btn btn-secondary btn-sm"
           disabled={page <= 1}
           onClick={() => onPage(page - 1)}
         >
@@ -23,7 +23,7 @@ export function Pager({ page, limit, total, onPage }: Props) {
         </button>
         <button
           type="button"
-          className="rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-40"
+          className="btn btn-secondary btn-sm"
           disabled={page >= pages}
           onClick={() => onPage(page + 1)}
         >

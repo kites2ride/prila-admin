@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ListPage } from '../components/ListPage';
+import { StatusBadge, statusLabel } from '../components/ui';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
+import { formatDateTime } from '../lib/format';
 
 type Row = {
   id: string;
@@ -48,25 +50,25 @@ export function SosPage() {
       error={error}
       filters={
         <select
-          className="rounded-xl border border-[var(--prila-border)] px-3 py-2 text-sm"
+          className="field"
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">All</option>
+          <option value="">All statuses</option>
           {['open', 'ack', 'closed'].map((s) => (
             <option key={s} value={s}>
-              {s}
+              {statusLabel(s)}
             </option>
           ))}
         </select>
       }
     >
-      <div className="overflow-hidden rounded-2xl border border-[var(--prila-border)] bg-white">
+      <div className="surface overflow-x-auto">
         <table className="min-w-full text-left text-sm">
-          <thead className="bg-[var(--prila-bg)] text-xs uppercase text-[var(--prila-muted)]">
+          <thead className="bg-[var(--prila-bg)] text-xs text-[var(--prila-muted)]">
             <tr>
               <th className="px-4 py-3">When</th>
               <th className="px-4 py-3">Rider</th>
@@ -78,21 +80,21 @@ export function SosPage() {
           <tbody>
             {(data?.items ?? []).map((row) => (
               <tr key={row.id} className="border-t border-[var(--prila-border)]">
-                <td className="px-4 py-3 text-[var(--prila-muted)]">
-                  {row.createdAt ? new Date(row.createdAt).toLocaleString() : '—'}
+                <td className="px-4 py-3 text-[var(--prila-muted)] whitespace-nowrap">
+                  {row.createdAt ? formatDateTime(row.createdAt) : '—'}
                 </td>
-                <td className="px-4 py-3 break-all text-xs">{row.riderId}</td>
+                <td className="mono px-4 py-3 break-all text-xs text-slate-600">{row.riderId}</td>
                 <td className="px-4 py-3">
                   {row.lat != null && row.lng != null ? `${row.lat.toFixed(4)}, ${row.lng.toFixed(4)}` : '—'}
                 </td>
                 <td className="px-4 py-3">{row.note ?? '—'}</td>
                 <td className="px-4 py-3">
                   {row.status === 'open' ? (
-                    <button type="button" className="text-red-600 font-medium" disabled={busy} onClick={() => void ack(row.id)}>
+                    <button type="button" className="btn btn-danger-soft btn-sm" disabled={busy} onClick={() => void ack(row.id)}>
                       Ack
                     </button>
                   ) : (
-                    row.status
+                    <StatusBadge status={row.status} />
                   )}
                 </td>
               </tr>

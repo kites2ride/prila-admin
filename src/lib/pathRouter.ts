@@ -25,6 +25,8 @@ export type RouteId =
   | 'nudges'
   | 'sos'
   | 'audit'
+  | 'profile'
+  | 'settings'
   | 'login';
 
 const ROUTES: RouteId[] = [
@@ -54,6 +56,8 @@ const ROUTES: RouteId[] = [
   'services-fares',
   'rides',
   'audit',
+  'profile',
+  'settings',
   'login',
 ];
 

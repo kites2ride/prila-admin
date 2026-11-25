@@ -1,5 +1,6 @@
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
+import { formatDateTime } from '../lib/format';
 
 type Nudge = {
   id: string;
@@ -28,14 +29,14 @@ export function NudgesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold">Nudges</h1>
-        <p className="mt-1 text-sm text-[var(--prila-muted)]">Cron every 15 min when enabled</p>
+        <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Nudges</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500">Cron every 15 min when enabled</p>
       </div>
-      {error ? <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
+      {error ? <div className="alert alert-danger">{error}</div> : null}
       {loading ? <div className="prila-skel h-24 w-full" /> : null}
       <div className="grid gap-3">
         {(data?.items ?? []).map((n) => (
-          <div key={n.id} className="rounded-2xl border border-[var(--prila-border)] bg-white p-4">
+          <div key={n.id} className="surface p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="font-semibold">{n.title}</div>
@@ -45,7 +46,7 @@ export function NudgesPage() {
                 <p className="mt-2 text-sm">{n.body}</p>
                 {n.lastRunAt ? (
                   <div className="mt-1 text-xs text-[var(--prila-muted)]">
-                    Last run {new Date(n.lastRunAt).toLocaleString()}
+                    Last run {formatDateTime(n.lastRunAt)}
                   </div>
                 ) : null}
               </div>
