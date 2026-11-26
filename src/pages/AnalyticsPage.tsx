@@ -1,7 +1,10 @@
+import { Suspense, lazy } from 'react';
 import { ListPage } from '../components/ListPage';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { useStickyState } from '../lib/useStickyState';
 import { formatDateTime } from '../lib/format';
+
+const StackedBarChart = lazy(() => import('../components/StackedBarChart'));
 
 type Row = {
   id: string;
@@ -30,6 +33,23 @@ export function AnalyticsPage() {
         <h1 className="text-2xl font-semibold text-[var(--prila-ink)]">Analytics</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">Events + permission coverage</p>
       </div>
+
+      {perms.data ? (
+        <div className="surface p-4">
+          <div className="font-semibold">Permission coverage</div>
+          <Suspense fallback={<div className="prila-skel mt-3 h-52" aria-busy="true" />}>
+            <StackedBarChart
+              categories={['Rider location', 'Pilot location', 'Rider notifications', 'Pilot notifications']}
+              series={[
+                { name: 'Always', color: '#10b981', data: [perms.data.riders.locAlways ?? 0, perms.data.pilots.locAlways ?? 0, null, null] },
+                { name: 'While in use', color: '#38bdf8', data: [perms.data.riders.locWhile ?? 0, perms.data.pilots.locWhile ?? 0, null, null] },
+                { name: 'Granted', color: '#34d399', data: [null, null, perms.data.riders.notifGranted ?? 0, perms.data.pilots.notifGranted ?? 0] },
+                { name: 'Denied', color: '#f43f5e', data: [perms.data.riders.locDenied ?? 0, perms.data.pilots.locDenied ?? 0, perms.data.riders.notifDenied ?? 0, perms.data.pilots.notifDenied ?? 0] },
+              ]}
+            />
+          </Suspense>
+        </div>
+      ) : null}
 
       {perms.data ? (
         <div className="grid gap-3 sm:grid-cols-2">

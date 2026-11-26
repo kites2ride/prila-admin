@@ -4,6 +4,7 @@ import { Card, Field, Toggle, inputCls } from '../components/formKit';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { MsgToast } from '../components/Toaster';
+import { SaveButton } from '../components/SaveButton';
 
 /* ───────────── types (mirror backend homePromoValueSchema) ───────────── */
 
@@ -621,14 +622,7 @@ export function HomePromoPage() {
       </fieldset>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          disabled={saving || !dirty}
-          onClick={onSaveClick}
-          className="btn btn-primary"
-        >
-          {saving ? 'Saving…' : 'Save changes'}
-        </button>
+        <SaveButton saving={saving} failed={Boolean(err)} disabled={!dirty} onClick={onSaveClick} />
         <button
           type="button"
           disabled={saving || !dirty}

@@ -4,6 +4,7 @@ import { Card, Field, inputCls } from '../components/formKit';
 import { adminFetch } from '../lib/adminFetch';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { MsgToast } from '../components/Toaster';
+import { SaveButton } from '../components/SaveButton';
 
 type AppKey = 'customer' | 'pilot';
 type Platform = 'android' | 'ios';
@@ -336,14 +337,7 @@ export function AppUpdatePage() {
       ))}
 
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          disabled={saving || !dirty}
-          onClick={onSave}
-          className="btn btn-primary"
-        >
-          {saving ? 'Saving…' : 'Save changes'}
-        </button>
+        <SaveButton saving={saving} failed={Boolean(err)} disabled={!dirty} onClick={onSave} />
         <button
           type="button"
           disabled={saving || !dirty}

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { AnimatedGridPattern } from './fx/AnimatedGridPattern';
 
 type Tone = 'neutral' | 'success' | 'danger' | 'warn' | 'info' | 'accent';
 
@@ -26,10 +27,16 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-[var(--prila-border)] bg-white px-6 py-12 text-center">
-      <p className="text-sm font-semibold text-[var(--prila-ink)]">{title}</p>
-      {hint ? <p className="max-w-sm text-[13px] text-slate-500">{hint}</p> : null}
-      {action ? <div className="mt-3">{action}</div> : null}
+    <div className="relative flex flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-dashed border-[var(--prila-border)] bg-white px-6 py-12 text-center">
+      <AnimatedGridPattern
+        numSquares={8}
+        maxOpacity={0.08}
+        duration={6}
+        className="!fill-slate-500/20 !stroke-slate-400/15 [mask-image:radial-gradient(260px_circle_at_center,white,transparent)]"
+      />
+      <p className="relative text-sm font-semibold text-[var(--prila-ink)]">{title}</p>
+      {hint ? <p className="relative max-w-sm text-[13px] text-slate-500">{hint}</p> : null}
+      {action ? <div className="relative mt-3">{action}</div> : null}
     </div>
   );
 }

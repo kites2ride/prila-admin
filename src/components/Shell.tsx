@@ -5,6 +5,7 @@ import { useKycPending } from '../lib/kycAlerts';
 import { NAV_GROUPS, iconFor } from '../lib/nav';
 import { CommandPalette } from './CommandPalette';
 import { Toaster } from './Toaster';
+import { AmbientGrid } from './AmbientGrid';
 
 type Props = {
   route: RouteId;
@@ -94,11 +95,12 @@ export function Shell({ route, children }: Props) {
       </aside>
       <CommandPalette />
       <Toaster />
-      <div className="min-w-0">
+      <div className="relative min-w-0">
+        <AmbientGrid />
         <header className="sticky top-0 z-30 flex h-14 items-center justify-end border-b border-[var(--prila-border)] bg-[var(--prila-bg)]/90 px-4 backdrop-blur md:px-8">
           <ProfileMenu />
         </header>
-        <main id="main" className="min-w-0 p-4 md:p-8">
+        <main id="main" className="relative min-w-0 p-4 md:p-8">
           <div className="mx-auto max-w-[1400px]">{children}</div>
         </main>
       </div>

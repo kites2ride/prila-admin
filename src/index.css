@@ -161,8 +161,14 @@
   .btn-sm { min-height: 2rem; padding: 0 0.75rem; border-radius: var(--r-sm); font-size: 0.8125rem; }
   .btn:disabled { opacity: 0.5; box-shadow: none; }
 
-  .btn-primary { background: var(--prila-ink); color: #fff; }
-  .btn-primary:hover:not(:disabled) { background: #1e293b; }
+  /* Textured primary (Cult UI texture-button look): soft top-lit gradient, inner highlight, hairline edge. */
+  .btn-primary {
+    background: linear-gradient(180deg, #334155 0%, var(--prila-ink) 100%);
+    color: #fff;
+    border-color: rgba(15, 23, 42, 0.9);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 1px rgba(15, 23, 42, 0.2);
+  }
+  .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #3f4d63 0%, #1e293b 100%); }
 
   .btn-secondary { background: #fff; color: var(--prila-ink); border-color: var(--prila-border); }
   .btn-secondary:hover:not(:disabled) { background: var(--prila-surface-2); border-color: #cbd5e1; }

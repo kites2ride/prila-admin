@@ -1,7 +1,13 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
 import { useAdminQuery } from '../lib/useAdminQuery';
 import { todayYmd, useStickyState } from '../lib/useStickyState';
+import { CountUp } from '../components/CountUp';
+import { BorderBeam } from '../components/fx/BorderBeam';
+import { TextureButton } from '../components/fx/TextureButton';
+import { StatusIndicator } from '../components/fx/StatusIndicator';
 import { formatDuration, formatInr, formatNumber, formatTime, formatYmd } from '../lib/format';
+
+const RideOutcomeChart = lazy(() => import('../components/RideOutcomeChart'));
 
 type Overview = {
   signups: { riders: number; pilots: number };
@@ -33,21 +39,26 @@ function Metric({
   value,
   hint,
   big,
+  count,
+  beam,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   big?: boolean;
+  count?: { n: number; fmt: (n: number) => string };
+  beam?: boolean;
 }) {
   return (
-    <div className="surface p-4">
+    <div className="surface relative overflow-hidden p-4">
+      {beam ? <BorderBeam size={90} duration={9} colorFrom="#ffc400" colorTo="#ff2d95" /> : null}
       <div className="text-[13px] font-medium text-[var(--prila-muted)]">{label}</div>
       <div
         className={`mt-1.5 font-semibold tracking-tight text-[var(--prila-ink)] tabular-nums ${
           big ? 'text-4xl leading-10' : 'text-[26px] leading-8'
         }`}
       >
-        {value}
+        {count ? <CountUp value={count.n} format={count.fmt} /> : value}
       </div>
       {hint ? <div className="mt-1 text-xs text-slate-400">{hint}</div> : null}
     </div>
@@ -111,9 +122,11 @@ export function OverviewPage() {
               onChange={(e) => setTo(e.target.value)}
             />
           </label>
-          <button type="button" className="btn btn-primary" onClick={reload}>
-            Refresh
-          </button>
+          <div className="w-24">
+            <TextureButton type="button" onClick={reload}>
+              Refresh
+            </TextureButton>
+          </div>
         </div>
       </div>
 
@@ -135,11 +148,12 @@ export function OverviewPage() {
         <>
           <Section title="Money">
             <div className="grid gap-3 md:grid-cols-2">
-              <Metric big label="Gross merchandise value" value={formatInr(data.gmvPaise)} hint="Total fares booked" />
+              <Metric big beam label="Gross merchandise value" value={formatInr(data.gmvPaise)} count={{ n: data.gmvPaise, fmt: formatInr }} hint="Total fares booked" />
               <Metric
                 big
                 label="Platform revenue"
                 value={formatInr(data.platformRevenuePaise)}
+                count={{ n: data.platformRevenuePaise, fmt: formatInr }}
                 hint={`${pct(data.platformRevenuePaise, data.gmvPaise)}% of GMV`}
               />
             </div>
@@ -159,8 +173,21 @@ export function OverviewPage() {
                   <div className="mt-1 text-2xl font-semibold tabular-nums text-emerald-600">{completedPct}%</div>
                 </div>
               </div>
+              <div className="mt-4 flex flex-wrap items-center gap-6">
+                <Suspense fallback={<div className="prila-skel h-48 w-48 shrink-0" aria-busy="true" />}>
+                  <RideOutcomeChart
+                    centerLabel="Requested"
+                    centerValue={formatNumber(rides.requested)}
+                    slices={[
+                      { label: 'Completed', n: rides.completed, color: '#10b981' },
+                      { label: 'Cancelled', n: rides.cancelled, color: '#f43f5e' },
+                      { label: 'Open / other', n: open, color: '#cbd5e1' },
+                    ]}
+                  />
+                </Suspense>
+                <div className="min-w-48 flex-1">
               <div
-                className="mt-5 flex h-2.5 overflow-hidden rounded-full bg-slate-100"
+                className="flex h-2.5 overflow-hidden rounded-full bg-slate-100"
                 role="img"
                 aria-label={`${completedPct}% completed, ${cancelledPct}% cancelled, ${openPct}% open`}
               >
@@ -180,20 +207,20 @@ export function OverviewPage() {
                   </div>
                 ))}
               </dl>
+                </div>
+              </div>
             </div>
           </Section>
 
           <Section title="People">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <Metric label="Rider signups" value={formatNumber(data.signups.riders)} />
-              <Metric label="Pilot signups" value={formatNumber(data.signups.pilots)} />
+              <Metric label="Rider signups" value={formatNumber(data.signups.riders)} count={{ n: data.signups.riders, fmt: formatNumber }} />
+              <Metric label="Pilot signups" value={formatNumber(data.signups.pilots)} count={{ n: data.signups.pilots, fmt: formatNumber }} />
               <div className="surface p-4">
                 <div className="text-[13px] font-medium text-[var(--prila-muted)]">Online pilots now</div>
                 <div className="mt-1.5 flex items-center gap-2.5 text-[26px] font-semibold leading-8 tracking-tight text-[var(--prila-ink)] tabular-nums">
-                  {formatNumber(data.onlinePilotsNow)}
-                  {data.onlinePilotsNow > 0 ? (
-                    <span className="prila-pulse-green h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                  ) : null}
+                  <CountUp value={data.onlinePilotsNow} format={formatNumber} />
+                  <StatusIndicator state={data.onlinePilotsNow > 0 ? 'active' : 'idle'} size="sm" />
                 </div>
                 <div className="mt-1 text-xs text-slate-400">Live</div>
               </div>
